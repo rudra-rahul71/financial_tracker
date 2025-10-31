@@ -1,4 +1,5 @@
 import 'package:financial_tracker/pages/home.dart';
+import 'package:financial_tracker/pages/profile.dart';
 import 'package:financial_tracker/structure.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,7 @@ final GoRouter _router = GoRouter(
         if(state.fullPath == '/') {
           return child;
         }
-        return ScaffoldStruct(child: child);
+        return NavigatorScafold(child: child);
       },
 
       routes: [
@@ -46,6 +47,12 @@ final GoRouter _router = GoRouter(
           path: '/home',
           builder: (BuildContext context, GoRouterState state) {
             return HomePage();
+          },
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (BuildContext context, GoRouterState state) {
+            return ProfilePage();
           },
         ),
       ]
