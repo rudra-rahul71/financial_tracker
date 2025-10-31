@@ -2,7 +2,7 @@ import 'package:financial_tracker/pages/home.dart';
 import 'package:financial_tracker/structure.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'splash_screen.dart';
+import 'pages/splash.dart';
 
 void main() {
   runApp(MyApp());
@@ -39,7 +39,7 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: '/',
           builder: (BuildContext context, GoRouterState state) {
-            return SplashScreen();
+            return SplashPage();
           },
         ),
         GoRoute(
