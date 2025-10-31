@@ -1,7 +1,8 @@
-// In main.dart
-
+import 'package:financial_tracker/pages/home.dart';
+import 'package:financial_tracker/structure.dart';
 import 'package:flutter/material.dart';
-import 'splash_screen.dart'; // Import your new splash screen
+import 'package:go_router/go_router.dart';
+import 'splash_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,12 +13,42 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Financial Tracker',
+    return MaterialApp.router(
+      title: 'Finance Tracker',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green, brightness: Brightness.dark),
+        useMaterial3: true,
       ),
-      home: SplashScreen(),
+      routerConfig: _router,
     );
   }
 }
+
+final GoRouter _router = GoRouter(
+  initialLocation: '/',
+  routes: <RouteBase>[
+    ShellRoute(
+      builder: (BuildContext context, GoRouterState state, Widget child) {
+        if(state.fullPath == '/') {
+          return child;
+        }
+        return ScaffoldStruct(child: child);
+      },
+
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (BuildContext context, GoRouterState state) {
+            return SplashScreen();
+          },
+        ),
+        GoRoute(
+          path: '/home',
+          builder: (BuildContext context, GoRouterState state) {
+            return HomePage();
+          },
+        ),
+      ]
+    ),
+  ],
+);

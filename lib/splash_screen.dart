@@ -1,7 +1,5 @@
-import 'dart:async';
-
-import 'package:financial_tracker/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1500), // Animation duration
+      duration: Duration(milliseconds: 1500),
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -28,14 +26,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       curve: Curves.easeIn,
     );
 
-    // Start the animation
-    _animationController.forward();
-
-    // Navigate to HomeScreen after 3 seconds
-    Timer(Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomePage()), // Replace with your main screen
-      );
+    _animationController.forward().then((onValue) {
+      context.go('/home');
     });
   }
 
@@ -48,13 +40,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Or your app's background color
+      backgroundColor: Colors.white,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: Image.asset(
             'assets/images/logo.png',
-            width: 250, // Adjust the size as needed
+            width: 250,
           ),
         ),
       ),
