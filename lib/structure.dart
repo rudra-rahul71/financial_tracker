@@ -15,13 +15,24 @@ class NavigatorScafold extends StatefulWidget {
 
 class _NavigatorScafoldState extends State<NavigatorScafold> {
   int _selectedIndex = 0;
+  bool extendRail = false;
 
-  void _onItemTapped(int index, BuildContext context) {
+  void _toggleRail() {
+    setState(() {
+      extendRail = !extendRail;
+    });
+  }
+
+  void _navigate(int index, BuildContext context) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
     switch (index) {
-      case 0:
+      case 1:
         context.go('/home');
         break;
-      case 1:
+      case 2:
         context.go('/profile');
         break;
     }
@@ -34,26 +45,31 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
         child: Row(
           children: <Widget>[
             NavigationRail(
+              extended: extendRail,
               backgroundColor: Theme.of(context).colorScheme.onPrimary,
               selectedIndex: _selectedIndex,
               groupAlignment: -1.0,
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-                _onItemTapped(index, context);
-              },
-              labelType: NavigationRailLabelType.all,
-              destinations: const <NavigationRailDestination>[
+              destinations: <NavigationRailDestination>[
                 NavigationRailDestination(
+                  icon: extendRail ? const Icon(Icons.menu_open) : const Icon(Icons.menu),
+                  label: const Text('Financial Tracker'),
+                ),
+                const NavigationRailDestination(
                   icon: Icon(Icons.home),
                   label: Text('Home'),
                 ),
-                NavigationRailDestination(
+                const NavigationRailDestination(
                   icon: Icon(Icons.account_circle),
                   label: Text('Profile'),
                 ),
               ],
+              onDestinationSelected: (int index) {
+                if(index == 0) {
+                  _toggleRail();
+                } else {
+                  _navigate(index, context);
+                }
+              },
             ),
             const VerticalDivider(thickness: 1, width: 1),
             Expanded(
