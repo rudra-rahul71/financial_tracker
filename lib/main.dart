@@ -1,9 +1,10 @@
 import 'package:financial_tracker/firebase_options.dart';
+import 'package:financial_tracker/pages/auth/sign_in.dart';
+import 'package:financial_tracker/pages/auth/verify_email.dart';
 import 'package:financial_tracker/pages/home.dart';
 import 'package:financial_tracker/pages/profile.dart';
 import 'package:financial_tracker/structure.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'pages/splash.dart';
@@ -14,11 +15,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  // FirebaseUIAuth.configureProviders([
-  //   EmailAuthProvider(),
-  //   PhoneAuthProvider()
-  // ]);
 
   runApp(MyApp());
 }
@@ -60,9 +56,13 @@ final GoRouter _router = GoRouter(
         GoRoute(
           path: '/auth/sign-in',
           builder: (BuildContext context, GoRouterState state) {
-            return SignInScreen(
-              providers: [EmailAuthProvider()],
-            );
+            return SignInPage();
+          },
+        ),
+        GoRoute(
+          path: '/auth/verify-email',
+          builder: (BuildContext context, GoRouterState state) {
+            return VerifyEmailPage();
           },
         ),
         GoRoute(
