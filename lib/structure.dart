@@ -14,7 +14,7 @@ class NavigatorScafold extends StatefulWidget {
 }
 
 class _NavigatorScafoldState extends State<NavigatorScafold> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   bool extendRail = false;
 
   void _toggleRail() {

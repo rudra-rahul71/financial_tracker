@@ -1,11 +1,25 @@
+import 'package:financial_tracker/firebase_options.dart';
 import 'package:financial_tracker/pages/home.dart';
 import 'package:financial_tracker/pages/profile.dart';
 import 'package:financial_tracker/structure.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'pages/splash.dart';
 
-void main() {
+Future<void> main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // FirebaseUIAuth.configureProviders([
+  //   EmailAuthProvider(),
+  //   PhoneAuthProvider()
+  // ]);
+
   runApp(MyApp());
 }
 
@@ -30,7 +44,7 @@ final GoRouter _router = GoRouter(
   routes: <RouteBase>[
     ShellRoute(
       builder: (BuildContext context, GoRouterState state, Widget child) {
-        if(state.fullPath == '/') {
+        if(state.fullPath == '/' || state.fullPath!.startsWith('/auth')) {
           return child;
         }
         return NavigatorScafold(child: child);
@@ -41,6 +55,14 @@ final GoRouter _router = GoRouter(
           path: '/',
           builder: (BuildContext context, GoRouterState state) {
             return SplashPage();
+          },
+        ),
+        GoRoute(
+          path: '/auth/sign-in',
+          builder: (BuildContext context, GoRouterState state) {
+            return SignInScreen(
+              providers: [EmailAuthProvider()],
+            );
           },
         ),
         GoRoute(

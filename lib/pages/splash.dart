@@ -27,7 +27,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     );
 
     _animationController.forward().then((onValue) {
-      context.go('/home');
+      context.go('/auth/sign-in');
     });
   }
 
