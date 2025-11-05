@@ -77,7 +77,7 @@ final GoRouter _router = GoRouter(
             return ProfilePage();
           },
         ),
-      ]
+      ],
     ),
   ],
 );
