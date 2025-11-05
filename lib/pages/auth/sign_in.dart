@@ -8,17 +8,14 @@ class SignInPage extends StatelessWidget {
 
   static AuthStateChangeAction<UserCreated> _userCreated() {
     return AuthStateChangeAction<UserCreated>((context, state) {
-      context.push('/auth/sign-in');
-
-      SnackbarService(context).showSuccessSnackbar(message: 'User successfully created!\nPlease sign in.');
+      context.push('/auth/verify-email');
+      SnackbarService(context).showSuccessSnackbar(message: 'User successfully created!');
     });
   }
 
   static AuthStateChangeAction<SignedIn> _userSignIn() {
     return AuthStateChangeAction<SignedIn>((context, state) {
-      if(!state.user!.emailVerified) {
-        context.push('/auth/verify-email');
-      }
+      context.push('/home');
     });
   }
 

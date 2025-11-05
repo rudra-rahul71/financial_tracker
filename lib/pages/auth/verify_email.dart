@@ -7,7 +7,11 @@ class VerifyEmailPage extends StatelessWidget {
 
   static AuthCancelledAction _cancel() {
     return AuthCancelledAction((context) {
-      context.pop();
+      FirebaseUIAuth.signOut(context: context).then((value) {
+        if (context.mounted) { 
+          context.pop();
+        }
+      });
     });
   }
 
