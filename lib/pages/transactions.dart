@@ -10,6 +10,15 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
+
+  int _days = 30;
+
+  void _updateDays(int days) {
+    setState(() {
+      _days = days;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -18,7 +27,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PageHeader(header: 'Transactions', sub: 'Track and manage all your transactions',
-            action: DayDropdown()),
+            action: DayDropdown(daysUpdated: _updateDays,)),
           Expanded(child: Center(child: Text('No Analytics'),))
         ],
       ),

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 class DayDropdown extends StatefulWidget {
-  const DayDropdown({super.key});
+  final ValueChanged<int> daysUpdated;
+
+  const DayDropdown({
+    super.key,
+    required this.daysUpdated,
+  });
 
   @override
   State<DayDropdown> createState() => _DayDropdownState();
@@ -37,6 +42,7 @@ class _DayDropdownState extends State<DayDropdown> {
         onChanged: (int? newValue) {
           setState(() {
             _selectedDays = newValue;
+            widget.daysUpdated(newValue!);
           });
         },
         items: _daysOptions.map<DropdownMenuItem<int>>((int value) {

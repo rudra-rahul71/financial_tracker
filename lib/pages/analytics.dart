@@ -10,6 +10,15 @@ class AnalyticsPage extends StatefulWidget {
 }
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
+
+  int _days = 30;
+
+  void _updateDays(int days) {
+    setState(() {
+      _days = days;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -18,7 +27,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PageHeader(header: 'Analytics', sub: 'Deep insights into your spending patterns',
-            action: DayDropdown()),
+            action: DayDropdown(daysUpdated: _updateDays,)),
           Expanded(child: Center(child: Text('No Analytics'),))
         ],
       ),

@@ -9,6 +9,20 @@ class AccountsPage extends StatefulWidget {
 }
 
 class _AccountsPageState extends State<AccountsPage> {
+  Future<void> _initPlaidIntegration() async {
+    // setState(() {
+    //   _isLoading = true;
+    // });
+
+    // await _apiService.initPlaidIntegration();
+    // final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // setState(() {
+    //   accessTokens = prefs.getStringList('accessTokens');
+    //   _isLoading = false;
+    // });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -19,7 +33,7 @@ class _AccountsPageState extends State<AccountsPage> {
           PageHeader(header: 'Accounts', sub: 'Manage your financial accounts', 
             action: ElevatedButton.icon(
               onPressed: () {
-                  // Handle add account action
+                _initPlaidIntegration();
               },
               icon: const Icon(Icons.add, size: 20),
               label: const Text(
