@@ -8,20 +8,26 @@ import 'package:financial_tracker/pages/home.dart';
 import 'package:financial_tracker/pages/insights.dart';
 import 'package:financial_tracker/pages/profile.dart';
 import 'package:financial_tracker/pages/transactions.dart';
+import 'package:financial_tracker/services/api_service.dart';
 import 'package:financial_tracker/structure.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'pages/splash.dart';
 
-Future<void> main() async {
+final getIt = GetIt.instance;
 
+void setupLocator() {
+  getIt.registerLazySingleton<ApiService>(() => ApiService());
+}
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  setupLocator();
   runApp(MyApp());
 }
 

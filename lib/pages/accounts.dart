@@ -1,4 +1,6 @@
 import 'package:financial_tracker/core/page_header.dart';
+import 'package:financial_tracker/main.dart';
+import 'package:financial_tracker/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class AccountsPage extends StatefulWidget {
@@ -9,18 +11,19 @@ class AccountsPage extends StatefulWidget {
 }
 
 class _AccountsPageState extends State<AccountsPage> {
+  final ApiService _apiService = getIt<ApiService>();
+  bool _loading = false;
+
   Future<void> _initPlaidIntegration() async {
-    // setState(() {
-    //   _isLoading = true;
-    // });
+    setState(() {
+      _loading = true;
+    });
 
-    // await _apiService.initPlaidIntegration();
-    // final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await _apiService.initPlaidIntegration();
 
-    // setState(() {
-    //   accessTokens = prefs.getStringList('accessTokens');
-    //   _isLoading = false;
-    // });
+    setState(() {
+      _loading = false;
+    });
   }
 
   @override
@@ -53,8 +56,8 @@ class _AccountsPageState extends State<AccountsPage> {
             ),
           ),
           Expanded(child: Center(child:
-           Text('No Accounts'),
-           ))
+            _loading ? null : Text('No Accounts'),
+          ))
         ],
       ),
     );
