@@ -19,7 +19,7 @@ class _DayDropdownState extends State<DayDropdown> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 30,
+      height: 40,
       width: 140,
       child: DropdownButtonFormField<int>(
         initialValue: _selectedDays,

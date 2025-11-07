@@ -14,12 +14,12 @@ class _AccountsPageState extends State<AccountsPage> {
   final ApiService _apiService = getIt<ApiService>();
   bool _loading = false;
 
-  Future<void> _initPlaidIntegration() async {
+  Future<void> _initPlaidIntegration(BuildContext context) async {
     setState(() {
       _loading = true;
     });
 
-    await _apiService.initPlaidIntegration();
+    await _apiService.initPlaidIntegration(context);
 
     setState(() {
       _loading = false;
@@ -36,7 +36,7 @@ class _AccountsPageState extends State<AccountsPage> {
           PageHeader(header: 'Accounts', sub: 'Manage your financial accounts', 
             action: ElevatedButton.icon(
               onPressed: () {
-                _initPlaidIntegration();
+                _initPlaidIntegration(context);
               },
               icon: const Icon(Icons.add, size: 20),
               label: const Text(

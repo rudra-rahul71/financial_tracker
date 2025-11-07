@@ -23,4 +23,26 @@ class SnackbarService {
       )
     );
   }
+
+  void showErrorSnackbar({required String message}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.error,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            Expanded(child: Text(
+              message,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              textAlign: TextAlign.right,
+            ),),
+          ],
+        ),
+        backgroundColor: Theme.of(context).colorScheme.onError,
+        behavior: SnackBarBehavior.floating,
+      )
+    );
+  }
 }
