@@ -1,8 +1,13 @@
 import 'package:financial_tracker/firebase_options.dart';
+import 'package:financial_tracker/pages/accounts.dart';
+import 'package:financial_tracker/pages/analytics.dart';
 import 'package:financial_tracker/pages/auth/sign_in.dart';
 import 'package:financial_tracker/pages/auth/verify_email.dart';
+import 'package:financial_tracker/pages/budgets.dart';
 import 'package:financial_tracker/pages/home.dart';
+import 'package:financial_tracker/pages/insights.dart';
 import 'package:financial_tracker/pages/profile.dart';
+import 'package:financial_tracker/pages/transactions.dart';
 import 'package:financial_tracker/structure.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -104,6 +109,36 @@ final GoRouter _router = GoRouter(
           path: '/home',
           builder: (BuildContext context, GoRouterState state) {
             return HomePage();
+          },
+        ),
+        GoRoute(
+          path: '/transactions',
+          builder: (BuildContext context, GoRouterState state) {
+            return TransactionsPage();
+          },
+        ),
+        GoRoute(
+          path: '/analytics',
+          builder: (BuildContext context, GoRouterState state) {
+            return AnalyticsPage();
+          },
+        ),
+        GoRoute(
+          path: '/budgets',
+          builder: (BuildContext context, GoRouterState state) {
+            return BudgetsPage();
+          },
+        ),
+        GoRoute(
+          path: '/accounts',
+          builder: (BuildContext context, GoRouterState state) {
+            return AccountsPage();
+          },
+        ),
+        GoRoute(
+          path: '/insights',
+          builder: (BuildContext context, GoRouterState state) {
+            return InsightsPage();
           },
         ),
         GoRoute(

@@ -33,6 +33,21 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
         context.go('/home');
         break;
       case 2:
+        context.go('/transactions');
+        break;
+      case 3:
+        context.go('/analytics');
+        break;
+      case 4:
+        context.go('/budgets');
+        break;
+      case 5:
+        context.go('/accounts');
+        break;
+      case 6:
+        context.go('/insights');
+        break;
+      case 7:
         context.go('/profile');
         break;
     }
@@ -57,6 +72,26 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
                 const NavigationRailDestination(
                   icon: Icon(Icons.home),
                   label: Text('Home'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.credit_card),
+                  label: Text('Transactions'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.insights),
+                  label: Text('Analytics'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.track_changes),
+                  label: Text('Budgets'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.account_balance),
+                  label: Text('Accounts'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.lightbulb),
+                  label: Text('Insights'),
                 ),
                 const NavigationRailDestination(
                   icon: Icon(Icons.account_circle),
