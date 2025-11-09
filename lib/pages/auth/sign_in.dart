@@ -1,10 +1,14 @@
+import 'package:financial_tracker/main.dart';
+import 'package:financial_tracker/services/api_service.dart';
 import 'package:financial_tracker/services/snackbar.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class SignInPage extends StatelessWidget {
-  const SignInPage({super.key});
+  SignInPage({super.key});
+
+  final ApiService _apiService = getIt<ApiService>();
 
   static AuthStateChangeAction<UserCreated> _userCreated() {
     return AuthStateChangeAction<UserCreated>((context, state) {
@@ -13,8 +17,9 @@ class SignInPage extends StatelessWidget {
     });
   }
 
-  static AuthStateChangeAction<SignedIn> _userSignIn() {
+  AuthStateChangeAction<SignedIn> _userSignIn() {
     return AuthStateChangeAction<SignedIn>((context, state) {
+      _apiService.searchAccounts(context);
       context.push('/home');
     });
   }

@@ -14,6 +14,25 @@ class ApiService {
   StreamSubscription<LinkSuccess>? _onSuccessSubscription;
   StreamSubscription<LinkExit>? _onExitSubscription;
 
+  Future<void> searchAccounts(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser!;
+    final idToken = await user.getIdToken();
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $idToken',
+    };
+
+    final url = Uri.parse('$host/search');
+
+    final response = await http.get(url, headers: headers);
+    if(response.statusCode != 200) {
+      if(context.mounted) {
+        SnackbarService(context).showErrorSnackbar(message: 'Please connect account to view financial data!');
+      }
+    }
+  }
+
   Future<void> _createPlaidAccessToken(BuildContext context, String publicToken) async {
     final user = FirebaseAuth.instance.currentUser!;
     final idToken = await user.getIdToken();
