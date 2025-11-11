@@ -3,8 +3,8 @@ import 'package:financial_tracker/models/item.dart';
 import 'package:flutter/material.dart';
 
 class AccountCard extends StatefulWidget {
-  MapEntry<String, (Item, List<Account>)> connection;
-  AccountCard({
+  final MapEntry<String, (Item, List<Account>)> connection;
+  const AccountCard({
     super.key,
     required this.connection
   });
