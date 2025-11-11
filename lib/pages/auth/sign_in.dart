@@ -18,9 +18,11 @@ class SignInPage extends StatelessWidget {
   }
 
   AuthStateChangeAction<SignedIn> _userSignIn() {
-    return AuthStateChangeAction<SignedIn>((context, state) {
-      _apiService.searchAccounts(context);
-      context.push('/home');
+    return AuthStateChangeAction<SignedIn>((context, state) async {
+      await _apiService.searchAccounts(context);
+      if(context.mounted) {
+        context.push('/home');
+      }
     });
   }
 

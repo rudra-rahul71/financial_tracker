@@ -41,6 +41,8 @@ class ApiService {
       final data = json.decode(response.body);
       final connections = Connection.fromJsonList(data);
       _databaseService.clearTable(Item.tableName);
+      _databaseService.clearTable(Account.tableName);
+      _databaseService.clearTable(TransactionEntry.tableName);
       for(final connection in connections) {
         _databaseService.updateTable(Item.tableName, connection.item);
         for(final account in connection.accounts) {
@@ -59,7 +61,7 @@ class ApiService {
     }
   }
 
-  Future<void> _createPlaidAccessToken(BuildContext context, String publicToken) async {
+  Future<void> createPlaidAccessToken(BuildContext context, String publicToken) async {
     final user = FirebaseAuth.instance.currentUser!;
     final idToken = await user.getIdToken();
 
@@ -83,7 +85,7 @@ class ApiService {
     }
   }
 
-  Future<void> initPlaidIntegration(BuildContext context) async {
+  Future<dynamic> initPlaidIntegration(BuildContext context) async {
     try {
       final user = FirebaseAuth.instance.currentUser!;
       final idToken = await user.getIdToken();
@@ -105,20 +107,11 @@ class ApiService {
             noLoadingState: true,
         );
         await PlaidLink.create(configuration: configuration);
-        _onSuccessSubscription =PlaidLink.onSuccess.listen((LinkSuccess event) async {
-          final publicToken = event.toJson()['publicToken'];
-          if(context.mounted) {
-            _createPlaidAccessToken(context, publicToken);
-          }
-          _onSuccessSubscription?.cancel();
-          _onExitSubscription?.cancel();
-        });
-
-        _onExitSubscription = PlaidLink.onExit.listen((LinkExit event) {
-          _onSuccessSubscription?.cancel();
-          _onExitSubscription?.cancel();
-        });
-        PlaidLink.open();
+        await PlaidLink.open();
+        return await Future.any([
+          PlaidLink.onSuccess.first, // A Future<SuccessType>
+          PlaidLink.onExit.first,    // A Future<ExitType>
+        ]);
       } else {
         if(context.mounted) {
           SnackbarService(context).showErrorSnackbar(message: 'Failed to initiate connection process!');
@@ -129,5 +122,6 @@ class ApiService {
         SnackbarService(context).showErrorSnackbar(message: 'Failed to initiate connection process!');
       }
     }
+    return null;
   }
 }

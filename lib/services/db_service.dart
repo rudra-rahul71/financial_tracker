@@ -68,9 +68,21 @@ class DatabaseService {
   Future<List<Item>> getItems() async {
     final db = await database;
     final data = await db.query(Item.tableName);
-    List<Item> items = data.map(
-      (e) => Item(id: e["id"] as String, name: e["name"] as String)
-    ).toList();
+    List<Item> items = data.map((item) => Item.fromMap(item)).toList();
     return items;
+  }
+
+  Future<List<Account>> getAccounts() async {
+    final db = await database;
+    final data = await db.query(Account.tableName);
+    List<Account> accounts = data.map((account) => Account.fromMap(account)).toList();
+    return accounts;
+  }
+
+  Future<List<TransactionEntry>> getTransactions() async {
+    final db = await database;
+    final data = await db.query(TransactionEntry.tableName);
+    List<TransactionEntry> transactions = data.map((transaction) => TransactionEntry.fromMap(transaction)).toList();
+    return transactions;
   }
 }

@@ -1,7 +1,11 @@
 import 'package:financial_tracker/core/page_header.dart';
 import 'package:financial_tracker/main.dart';
+import 'package:financial_tracker/models/account.dart';
 import 'package:financial_tracker/services/api_service.dart';
+import 'package:financial_tracker/services/db_service.dart';
+import 'package:financial_tracker/services/snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:plaid_flutter/plaid_flutter.dart';
 
 class AccountsPage extends StatefulWidget {
   const AccountsPage({super.key});
@@ -11,7 +15,9 @@ class AccountsPage extends StatefulWidget {
 }
 
 class _AccountsPageState extends State<AccountsPage> {
+  final DatabaseService _databaseService = DatabaseService.instance;
   final ApiService _apiService = getIt<ApiService>();
+  Iterable<MapEntry<String, List<Account>>> _accounts = {};
   bool _loading = false;
 
   Future<void> _initPlaidIntegration(BuildContext context) async {
@@ -19,11 +25,47 @@ class _AccountsPageState extends State<AccountsPage> {
       _loading = true;
     });
 
-    await _apiService.initPlaidIntegration(context);
+    dynamic resopnse = await _apiService.initPlaidIntegration(context);
+    if(resopnse != null && context.mounted && resopnse is LinkSuccess) {
+      final publicToken = resopnse.toJson()['publicToken'];
+      await _apiService.createPlaidAccessToken(context, publicToken);
+
+      if(context.mounted) {
+        await _apiService.searchAccounts(context);
+      }
+
+      await _updateAccounts();
+    } else {
+      if(context.mounted) {
+        SnackbarService(context).showErrorSnackbar(message: 'Failed to connect to bank!');
+      }
+    }
 
     setState(() {
       _loading = false;
     });
+  }
+
+  Future<void> _updateAccounts() async {
+    List<Account> accounts = await _databaseService.getAccounts();
+
+    Map<String, List<Account>> groupedAccounts = {};
+    for(final account in accounts) {
+      groupedAccounts
+        .putIfAbsent(account.itemId, () => [])
+        .add(account);
+    }
+
+    setState(() {
+      _accounts = groupedAccounts.entries;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    
+    _updateAccounts();
   }
 
   @override
@@ -56,7 +98,9 @@ class _AccountsPageState extends State<AccountsPage> {
             ),
           ),
           Expanded(child: Center(child:
-            _loading ? null : Text('No Accounts'),
+            _loading ? CircularProgressIndicator() :
+            _accounts.isEmpty ? Text('No Accounts') :
+            Text('${_accounts.length}'),
           ))
         ],
       ),
