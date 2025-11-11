@@ -1,3 +1,4 @@
+import 'package:financial_tracker/core/net_worth.dart';
 import 'package:financial_tracker/core/page_header.dart';
 import 'package:financial_tracker/main.dart';
 import 'package:financial_tracker/models/account.dart';
@@ -18,6 +19,8 @@ class _AccountsPageState extends State<AccountsPage> {
   final DatabaseService _databaseService = DatabaseService.instance;
   final ApiService _apiService = getIt<ApiService>();
   Iterable<MapEntry<String, List<Account>>> _accounts = {};
+  double _totalValue = 0.0;
+  int _totalAccounts = 0;
   bool _loading = false;
 
   Future<void> _initPlaidIntegration(BuildContext context) async {
@@ -48,6 +51,12 @@ class _AccountsPageState extends State<AccountsPage> {
 
   Future<void> _updateAccounts() async {
     List<Account> accounts = await _databaseService.getAccounts();
+
+    _totalAccounts = accounts.length;
+    _totalValue = accounts.fold(
+      0.0,
+      (double previousSum, Account account) => previousSum + (account.available ?? 0.0),
+    );
 
     Map<String, List<Account>> groupedAccounts = {};
     for(final account in accounts) {
@@ -100,7 +109,11 @@ class _AccountsPageState extends State<AccountsPage> {
           Expanded(child: Center(child:
             _loading ? CircularProgressIndicator() :
             _accounts.isEmpty ? Text('No Accounts') :
-            Text('${_accounts.length}'),
+            Column(
+              children: [
+                NetWorth(totalAccounts: _totalAccounts, totalValue: _totalValue),
+              ],
+            ),
           ))
         ],
       ),

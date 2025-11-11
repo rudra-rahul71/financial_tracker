@@ -109,8 +109,8 @@ class ApiService {
         await PlaidLink.create(configuration: configuration);
         await PlaidLink.open();
         return await Future.any([
-          PlaidLink.onSuccess.first, // A Future<SuccessType>
-          PlaidLink.onExit.first,    // A Future<ExitType>
+          PlaidLink.onSuccess.first,
+          PlaidLink.onExit.first,
         ]);
       } else {
         if(context.mounted) {
