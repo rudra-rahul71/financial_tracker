@@ -1,6 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:financial_tracker/models/account.dart';
+import 'package:financial_tracker/models/connection.dart';
+import 'package:financial_tracker/models/item.dart';
+import 'package:financial_tracker/models/transaction.dart';
+import 'package:financial_tracker/services/db_service.dart';
 import 'package:financial_tracker/services/snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +15,8 @@ import 'package:plaid_flutter/plaid_flutter.dart';
 class ApiService {
   final String host = 'http://10.0.2.2:8080';
   // final String host = 'http://localhost:8080';
+
+  final DatabaseService _databaseService = DatabaseService.instance;
 
   StreamSubscription<LinkSuccess>? _onSuccessSubscription;
   StreamSubscription<LinkExit>? _onExitSubscription;
@@ -29,6 +36,25 @@ class ApiService {
     if(response.statusCode != 200) {
       if(context.mounted) {
         SnackbarService(context).showErrorSnackbar(message: 'Please connect account to view financial data!');
+      }
+    } else {
+      final data = json.decode(response.body);
+      final connections = Connection.fromJsonList(data);
+      _databaseService.clearTable(Item.tableName);
+      for(final connection in connections) {
+        _databaseService.updateTable(Item.tableName, connection.item);
+        for(final account in connection.accounts) {
+          _databaseService.updateTable(Account.tableName, account);
+        }
+        for(final transaction in connection.transactions) {
+          _databaseService.updateTable(TransactionEntry.tableName, transaction);
+        }
+      }
+
+      if(connections.isEmpty) {
+        if(context.mounted) {
+          SnackbarService(context).showErrorSnackbar(message: 'Please connect account to view financial data!');
+        }
       }
     }
   }
