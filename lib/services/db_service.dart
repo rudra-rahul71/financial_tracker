@@ -65,11 +65,21 @@ class DatabaseService {
     db.insert(table, value.toMap());
   }
 
-  Future<List<Item>> getItems() async {
+  Future<Item?> getItemById(String id) async {
     final db = await database;
-    final data = await db.query(Item.tableName);
-    List<Item> items = data.map((item) => Item.fromMap(item)).toList();
-    return items;
+
+    final List<Map<String, dynamic>> result = await db.query(
+      Item.tableName,
+      where: '${Item.columnId} = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return Item.fromMap(result.first);
+    } else {
+      return null;
+    }
   }
 
   Future<List<Account>> getAccounts() async {

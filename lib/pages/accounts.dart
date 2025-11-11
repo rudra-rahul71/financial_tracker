@@ -1,7 +1,9 @@
+import 'package:financial_tracker/core/account_card.dart';
 import 'package:financial_tracker/core/net_worth.dart';
 import 'package:financial_tracker/core/page_header.dart';
 import 'package:financial_tracker/main.dart';
 import 'package:financial_tracker/models/account.dart';
+import 'package:financial_tracker/models/item.dart';
 import 'package:financial_tracker/services/api_service.dart';
 import 'package:financial_tracker/services/db_service.dart';
 import 'package:financial_tracker/services/snackbar.dart';
@@ -18,7 +20,7 @@ class AccountsPage extends StatefulWidget {
 class _AccountsPageState extends State<AccountsPage> {
   final DatabaseService _databaseService = DatabaseService.instance;
   final ApiService _apiService = getIt<ApiService>();
-  Iterable<MapEntry<String, List<Account>>> _accounts = {};
+  Iterable<MapEntry<String, (Item, List<Account>)>> _connections = {};
   double _totalValue = 0.0;
   int _totalAccounts = 0;
   bool _loading = false;
@@ -58,15 +60,26 @@ class _AccountsPageState extends State<AccountsPage> {
       (double previousSum, Account account) => previousSum + (account.available ?? 0.0),
     );
 
-    Map<String, List<Account>> groupedAccounts = {};
-    for(final account in accounts) {
-      groupedAccounts
-        .putIfAbsent(account.itemId, () => [])
-        .add(account);
-    }
+    Map<String, (Item, List<Account>)> groupedAccounts = {};
+      for (final account in accounts) {
+        final itemId = account.itemId;
+
+        _databaseService.getItemById(itemId);
+        final item = await _databaseService.getItemById(itemId);
+        
+        if (item == null) {
+          continue; 
+        }
+
+        groupedAccounts.update(
+          itemId,
+          (existingTuple) => (existingTuple.$1, [...existingTuple.$2, account]),
+          ifAbsent: () => (item, [account]),
+        );
+      }
 
     setState(() {
-      _accounts = groupedAccounts.entries;
+      _connections = groupedAccounts.entries;
     });
   }
 
@@ -108,13 +121,18 @@ class _AccountsPageState extends State<AccountsPage> {
           ),
           Expanded(child: Center(child:
             _loading ? CircularProgressIndicator() :
-            _accounts.isEmpty ? Text('No Accounts') :
-            Column(
-              children: [
-                NetWorth(totalAccounts: _totalAccounts, totalValue: _totalValue),
-              ],
+            _connections.isEmpty ? Text('No Accounts') :
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  NetWorth(totalAccounts: _totalAccounts, totalValue: _totalValue),
+                  ..._connections.map((account) {
+                    return AccountCard(connection: account);
+                  }),
+                ],
+              ),
             ),
-          ))
+          )),
         ],
       ),
     );

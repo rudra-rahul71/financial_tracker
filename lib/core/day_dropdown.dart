@@ -31,13 +31,6 @@ class _DayDropdownState extends State<DayDropdown> {
             borderRadius: BorderRadius.circular(10.0),
             borderSide: BorderSide.none,
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.5),
-          ),
         ),
         onChanged: (int? newValue) {
           setState(() {

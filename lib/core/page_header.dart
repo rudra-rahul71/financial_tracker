@@ -42,7 +42,7 @@ class _PageHeaderState extends State<PageHeader> {
                   widget.sub,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.surfaceBright,
+                    color: Theme.of(context).colorScheme.inversePrimary,
                   ),
                 ),
               ],

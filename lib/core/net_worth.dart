@@ -12,8 +12,6 @@ class NetWorth extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color dark = Theme.of(context).colorScheme.onPrimary;
-    final Color light = Theme.of(context).colorScheme.onPrimaryFixed;
     return Card(
       elevation: 4,
       child: Padding(
@@ -44,9 +42,9 @@ class NetWorth extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Across $totalAccounts accounts',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.inversePrimary,
                     ),
                   ),
                 ],
@@ -58,7 +56,7 @@ class NetWorth extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [light, dark],
+                  colors: [Theme.of(context).colorScheme.onPrimaryFixed, Theme.of(context).colorScheme.onPrimary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
