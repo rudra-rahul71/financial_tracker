@@ -1,3 +1,4 @@
+import 'package:financial_tracker/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class DayDropdown extends StatefulWidget {
@@ -14,7 +15,7 @@ class DayDropdown extends StatefulWidget {
 
 class _DayDropdownState extends State<DayDropdown> {
   final List<int> _daysOptions = [30, 60, 90];
-  int? _selectedDays = 30;
+  int? _selectedDays = ApiService.interval;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,8 @@ class _DayDropdownState extends State<DayDropdown> {
         onChanged: (int? newValue) {
           setState(() {
             _selectedDays = newValue;
-            widget.daysUpdated(newValue!);
+            ApiService.setMyVariable(newValue!);
+            widget.daysUpdated(newValue);
           });
         },
         items: _daysOptions.map<DropdownMenuItem<int>>((int value) {

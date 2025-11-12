@@ -10,13 +10,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
-  int _days = 30;
-
   void _updateDays(int days) {
-    setState(() {
-      _days = days;
-    });
   }
 
   @override

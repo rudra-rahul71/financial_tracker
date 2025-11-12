@@ -11,12 +11,7 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
 
-  int _days = 30;
-
   void _updateDays(int days) {
-    setState(() {
-      _days = days;
-    });
   }
 
   @override

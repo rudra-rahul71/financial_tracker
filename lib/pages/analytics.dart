@@ -1,7 +1,9 @@
 import 'package:financial_tracker/core/category_card.dart';
 import 'package:financial_tracker/core/day_dropdown.dart';
 import 'package:financial_tracker/core/page_header.dart';
+import 'package:financial_tracker/main.dart';
 import 'package:financial_tracker/models/transaction.dart';
+import 'package:financial_tracker/services/api_service.dart';
 import 'package:financial_tracker/services/db_service.dart';
 import 'package:flutter/material.dart';
 
@@ -14,12 +16,20 @@ class AnalyticsPage extends StatefulWidget {
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
   final DatabaseService _databaseService = DatabaseService.instance;
+  final ApiService _apiService = getIt<ApiService>();
   List<MapEntry<String, double>> _transactionByCategory = [];
-  int _days = 30;
+  bool _loading = false;
 
-  void _updateDays(int days) {
+  Future<void> _updateDays(int days) async {
     setState(() {
-      _days = days;
+      _loading = true;
+    });
+
+    await _apiService.searchAccounts(context);
+    await _updateTransactions();
+
+    setState(() {
+      _loading = false;
     });
   }
 
@@ -66,10 +76,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         children: <Widget>[
           PageHeader(header: 'Analytics', sub: 'Deep insights into your spending patterns',
             action: DayDropdown(daysUpdated: _updateDays)),
-          Expanded(child: _transactionByCategory.isEmpty ? 
-            Center(child:
-              Text('No Analytics')
-            ) : SingleChildScrollView(
+          Expanded(child:
+            _loading ? Center(child: CircularProgressIndicator()) :
+            _transactionByCategory.isEmpty ? Center(child: Text('No Analytics')) :
+            SingleChildScrollView(
               child: Column(
                 children: [
                   CategoryCard(groupedTransactions: _transactionByCategory),

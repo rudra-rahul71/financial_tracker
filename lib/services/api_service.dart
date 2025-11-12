@@ -13,13 +13,19 @@ import 'package:http/http.dart' as http;
 import 'package:plaid_flutter/plaid_flutter.dart';
 
 class ApiService {
-  final String host = 'http://10.0.2.2:8080';
-  // final String host = 'http://localhost:8080';
+  // final String host = 'http://10.0.2.2:8080';
+  final String host = 'http://localhost:8080';
 
   final DatabaseService _databaseService = DatabaseService.instance;
 
   StreamSubscription<LinkSuccess>? _onSuccessSubscription;
   StreamSubscription<LinkExit>? _onExitSubscription;
+
+  static int _interval = 30;
+  static int get interval => _interval;
+  static void setMyVariable(int newValue) {
+    _interval = newValue;
+  }
 
   Future<void> searchAccounts(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser!;
@@ -30,7 +36,7 @@ class ApiService {
       'Authorization': 'Bearer $idToken',
     };
 
-    final url = Uri.parse('$host/search');
+    final url = Uri.parse('$host/search/$_interval');
 
     final response = await http.get(url, headers: headers);
     if(response.statusCode != 200) {
