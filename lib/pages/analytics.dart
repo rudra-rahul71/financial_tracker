@@ -1,5 +1,6 @@
 import 'package:financial_tracker/core/category_card.dart';
 import 'package:financial_tracker/core/day_dropdown.dart';
+import 'package:financial_tracker/core/distribution_card.dart';
 import 'package:financial_tracker/core/page_header.dart';
 import 'package:financial_tracker/main.dart';
 import 'package:financial_tracker/models/transaction.dart';
@@ -82,6 +83,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             SingleChildScrollView(
               child: Column(
                 children: [
+                  DistributionCard(groupedTransactions: _transactionByCategory),
                   CategoryCard(groupedTransactions: _transactionByCategory),
                 ],
               ),
