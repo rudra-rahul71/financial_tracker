@@ -95,7 +95,7 @@ class _AccountsPageState extends State<AccountsPage> {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PageHeader(header: 'Accounts', sub: 'Manage your financial accounts', 
             action: ElevatedButton.icon(

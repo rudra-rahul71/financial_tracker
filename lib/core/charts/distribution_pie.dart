@@ -89,8 +89,8 @@ class _DistributionPieChartState extends State<DistributionPieChart> {
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Financial Overview'),
-          Text('Total Amount: \$${totalValue.toStringAsFixed(2)}'),
+          Text('Analytics Overview'),
+          Text('Total Spent: \$${totalValue.toStringAsFixed(2)}'),
         ],
       );
     }

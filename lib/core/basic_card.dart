@@ -1,19 +1,20 @@
-import 'package:financial_tracker/core/charts/category_spending.dart';
 import 'package:flutter/material.dart';
 
-class CategoryCard extends StatefulWidget {
-  final List<MapEntry<String, double>> groupedTransactions;
+class BasicCard extends StatefulWidget {
+  final String title;
+  final Widget body;
 
-  const CategoryCard({
+  const BasicCard({
     super.key,
-    required this.groupedTransactions,
+    required this.title,
+    required this.body
   });
 
   @override
-  State<CategoryCard> createState() => _CategoryCardState();
+  State<BasicCard> createState() => _BasicCardState();
 }
 
-class _CategoryCardState extends State<CategoryCard> {
+class _BasicCardState extends State<BasicCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -23,11 +24,11 @@ class _CategoryCardState extends State<CategoryCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Spending by Category'),
+            Text(widget.title),
             const SizedBox(height: 12.0),
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 250),
-              child: CategorySpending(groupedTransactions: widget.groupedTransactions),
+              child: widget.body,
             )
           ],
         ),

@@ -1,6 +1,7 @@
-import 'package:financial_tracker/core/category_card.dart';
+import 'package:financial_tracker/core/basic_card.dart';
+import 'package:financial_tracker/core/charts/category_spending.dart';
+import 'package:financial_tracker/core/charts/distribution_pie.dart';
 import 'package:financial_tracker/core/day_dropdown.dart';
-import 'package:financial_tracker/core/distribution_card.dart';
 import 'package:financial_tracker/core/page_header.dart';
 import 'package:financial_tracker/main.dart';
 import 'package:financial_tracker/models/transaction.dart';
@@ -83,8 +84,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             SingleChildScrollView(
               child: Column(
                 children: [
-                  DistributionCard(groupedTransactions: _transactionByCategory),
-                  CategoryCard(groupedTransactions: _transactionByCategory),
+                  BasicCard(title: 'Distribution', body: DistributionPieChart(groupedTransactions: _transactionByCategory)),
+                  BasicCard(title: 'Spending by Category', body: CategorySpending(groupedTransactions: _transactionByCategory)),
                 ],
               ),
             ),
