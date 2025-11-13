@@ -1,7 +1,6 @@
 import 'package:financial_tracker/models/account.dart';
 import 'package:financial_tracker/models/item.dart';
 import 'package:financial_tracker/models/transaction.dart';
-// import 'package:financial_tracker/models/transaction.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseService {
@@ -77,6 +76,23 @@ class DatabaseService {
 
     if (result.isNotEmpty) {
       return Item.fromMap(result.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<Account?> getAccountById(String id) async {
+    final db = await database;
+    
+    final List<Map<String, dynamic>> result = await db.query(
+      Account.tableName,
+      where: '${Account.columnId} = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return Account.fromMap(result.first);
     } else {
       return null;
     }

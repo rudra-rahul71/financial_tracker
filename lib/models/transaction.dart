@@ -65,4 +65,8 @@ class TransactionEntry {
       amount: (map[columnAmount] as num).toDouble()
     );
   }
+
+  TransactionEntry copy() {
+    return TransactionEntry(id: id, accountId: accountId, name: name, date: date, type: type, subtype: subtype, amount: amount);
+  }
 }
