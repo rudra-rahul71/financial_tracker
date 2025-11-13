@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class BasicCard extends StatefulWidget {
   final String title;
   final Widget body;
+  final Widget? action;
 
   const BasicCard({
     super.key,
     required this.title,
-    required this.body
+    required this.body,
+    this.action,
   });
 
   @override
@@ -24,7 +26,15 @@ class _BasicCardState extends State<BasicCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(widget.title),
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              runSpacing: 20.0,
+              spacing: 20.0,
+              children: [
+                Text(widget.title),
+                ?widget.action,
+              ]
+            ),
             const SizedBox(height: 12.0),
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 250),

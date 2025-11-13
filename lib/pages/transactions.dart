@@ -1,4 +1,5 @@
 import 'package:financial_tracker/core/basic_card.dart';
+import 'package:financial_tracker/core/charts/spending_tracker.dart';
 import 'package:financial_tracker/core/charts/transaction_history.dart';
 import 'package:financial_tracker/core/charts/transaction_table.dart';
 import 'package:financial_tracker/core/day_dropdown.dart';
@@ -24,6 +25,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Iterable<MapEntry<String, (Item, Account, List<TransactionEntry>)>> _groupedTransactions = [];
   Iterable<MapEntry<String, (Item, Account, List<TransactionEntry>)>> _selectedTransactions = [];
   List<TransactionEntry> transactions = [];
+  String category = 'Balance';
   bool _loading = false;
 
 
@@ -66,6 +68,43 @@ class _TransactionsPageState extends State<TransactionsPage> {
       _groupedTransactions = groupedTransactions.entries;
       _selectedTransactions = groupedTransactions.entries;
     });
+  }
+
+  Widget categoryDropdown() {
+    return IntrinsicWidth(
+      child: SizedBox(
+        height: 40,
+        child: DropdownButtonFormField<String>(
+          initialValue: category,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.onPrimary, 
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onChanged: (String? newValue) {
+            setState(() {
+              category = newValue!;
+            });
+          },
+          items: ['Balance', 'Spending'].map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            );
+          }).toList(),
+          dropdownColor: Theme.of(context).colorScheme.onPrimary,
+        ),
+      ),
+    );
   }
 
   @override
@@ -139,7 +178,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     ],
                   ),
                   SizedBox(height: 12),
-                  BasicCard(title: 'Balance History', body: TransactionHistory(groupedTransactions: _selectedTransactions)),
+                  category == 'Balance' ?
+                    BasicCard(title: 'Balance History', body: TransactionHistory(groupedTransactions: _selectedTransactions), action: categoryDropdown()) :
+                    BasicCard(title: 'Track Spending', body: SpendingTracker(transactions: _selectedTransactions.expand((entry) => entry.value.$3).toList()), action: categoryDropdown()),
                   BasicCard(title: 'All Transactions', 
                     body: TransactionTable(
                       transactions: _selectedTransactions.expand((entry) => entry.value.$3).toList(),

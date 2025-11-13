@@ -19,39 +19,40 @@ class _DayDropdownState extends State<DayDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      width: 140,
-      child: DropdownButtonFormField<int>(
-        initialValue: _selectedDays,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.onPrimary, 
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            borderSide: BorderSide.none,
-          ),
-        ),
-        onChanged: (int? newValue) {
-          setState(() {
-            _selectedDays = newValue;
-            ApiService.setMyVariable(newValue!);
-            widget.daysUpdated(newValue);
-          });
-        },
-        items: _daysOptions.map<DropdownMenuItem<int>>((int value) {
-          return DropdownMenuItem<int>(
-            value: value,
-            child: Text(
-              'Last $value days',
-              style: const TextStyle(
-                fontSize: 12,
-              ),
+    return IntrinsicWidth(
+      child: SizedBox(
+        height: 40,
+        child: DropdownButtonFormField<int>(
+          initialValue: _selectedDays,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.onPrimary, 
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide.none,
             ),
-          );
-        }).toList(),
-        dropdownColor: Theme.of(context).colorScheme.onPrimary,
+          ),
+          onChanged: (int? newValue) {
+            setState(() {
+              _selectedDays = newValue;
+              ApiService.setMyVariable(newValue!);
+              widget.daysUpdated(newValue);
+            });
+          },
+          items: _daysOptions.map<DropdownMenuItem<int>>((int value) {
+            return DropdownMenuItem<int>(
+              value: value,
+              child: Text(
+                'Last $value days',
+                style: const TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            );
+          }).toList(),
+          dropdownColor: Theme.of(context).colorScheme.onPrimary,
+        ),
       ),
     );
   }
