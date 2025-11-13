@@ -86,61 +86,63 @@ class _TransactionTableState extends State<TransactionTable> {
 
   @override
     Widget build(BuildContext context) {
-    return 
-    SingleChildScrollView(
-      child: DataTable(
-        columns: const <DataColumn>[
-          DataColumn(
-            label: Expanded(
-              child: Text('Date'),
+    return SingleChildScrollView(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: const <DataColumn>[
+            DataColumn(
+              label: Expanded(
+                child: Text('Date'),
+              ),
             ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Text('Merchant'),
+            DataColumn(
+              label: Expanded(
+                child: Text('Merchant'),
+              ),
             ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Text('Category'),
+            DataColumn(
+              label: Expanded(
+                child: Text('Category'),
+              ),
             ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Text('Amount'),
+            DataColumn(
+              label: Expanded(
+                child: Text('Amount'),
+              ),
             ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Text('Balance'),
+            DataColumn(
+              label: Expanded(
+                child: Text('Balance'),
+              ),
             ),
-          ),
-        ],
-        rows: [
-          ...balanceTracker.map((entry) {
-            return DataRow(
-              cells: <DataCell>[
-                DataCell(Text(formatDate(entry.$1.date))),
-                DataCell(Text(entry.$1.name)),
-                DataCell(Text(getLabel(entry.$1.type))),
-                DataCell(
-                  Text('\$${entry.$1.amount.abs().toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: entry.$1.amount < 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error
-                    ),
+          ],
+          rows: [
+            ...balanceTracker.map((entry) {
+              return DataRow(
+                cells: <DataCell>[
+                  DataCell(Text(formatDate(entry.$1.date))),
+                  DataCell(Text(entry.$1.name)),
+                  DataCell(Text(getLabel(entry.$1.type))),
+                  DataCell(
+                    Text('\$${entry.$1.amount.abs().toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: entry.$1.amount < 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error
+                      ),
+                    )
+                  ),
+                  DataCell(
+                    Text('${entry.$2 >= 0 ? '' : '-'}\$${entry.$2.abs().toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: entry.$2 > 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error
+                      ),
+                    )
                   )
-                ),
-                DataCell(
-                  Text('${entry.$2 >= 0 ? '' : '-'}\$${entry.$2.abs().toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: entry.$2 > 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error
-                    ),
-                  )
-                )
-              ],
-            );
-          }),
-        ],
+                ],
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
