@@ -27,7 +27,30 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<TransactionEntry> transactions = [];
   String category = 'Balance';
   bool _loading = false;
+  double totalSpent = 0;
+  double totalIncome = 0;
+  double avgTransactions = 0;
+  int totalTransactions = 0;
 
+  _updateInfoCards() {
+    totalSpent = 0;
+    totalIncome = 0;
+    avgTransactions = 0;
+    totalTransactions = 0;
+
+    for(final entry in _selectedTransactions) {
+      for(final transaction in entry.value.$3) {
+        if(transaction.amount > 0) {
+          totalSpent += transaction.amount;
+          totalTransactions++;
+        } else {
+          totalIncome += transaction.amount.abs();
+        }
+      }
+    }
+
+    avgTransactions = totalSpent / totalTransactions;
+  }
 
   Future<void> _updateDays(int days) async {
     setState(() {
@@ -45,6 +68,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   void _updateTransactionGroup(String key) {
     setState(() {
       _selectedTransactions = key == '1' ? _groupedTransactions : [_groupedTransactions.firstWhere((e) => e.key == key)];
+      _updateInfoCards();
     });
   }
 
@@ -67,6 +91,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       _groupedTransactions = groupedTransactions.entries;
       _selectedTransactions = groupedTransactions.entries;
+      _updateInfoCards();
     });
   }
 
@@ -176,6 +201,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         ),
                       ),
                     ],
+                  ),
+                  SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        InfoCard(title: 'Total Spent', value: '\$${totalSpent.toStringAsFixed(2)}', color: Theme.of(context).colorScheme.errorContainer,),
+                        InfoCard(title: 'Total Income', value: '\$${totalIncome.toStringAsFixed(2)}', color: Theme.of(context).colorScheme.primaryContainer),
+                        InfoCard(title: 'Avg Transaction', value: '\$${avgTransactions.abs().toStringAsFixed(2)}'),
+                        InfoCard(title: 'Total Transactions', value: totalTransactions.toString()),
+                      ],
+                    ),
                   ),
                   SizedBox(height: 12),
                   category == 'Balance' ?
