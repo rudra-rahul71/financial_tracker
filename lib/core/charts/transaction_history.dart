@@ -19,7 +19,7 @@ class TransactionHistory extends StatefulWidget {
 class _TransactionHistoryState extends State<TransactionHistory> {
   @override
   Widget build(BuildContext context) {
-    List<(Item, Account, List<TransactionEntry>)> list = [];
+    List<(Item, Account, List<TransactionEntry>, Set<String>)> list = [];
     DateTime now = DateTime.now();
     double maxVal = -double.maxFinite;
     double minVal = double.maxFinite;
@@ -32,50 +32,51 @@ class _TransactionHistoryState extends State<TransactionHistory> {
 
     for (final entry in widget.groupedTransactions) {
       List<TransactionEntry> transactionList = [];
-      transactionList.add(
-        TransactionEntry(
-          id: '',
-          accountId: '',
-          name: '',
-          date:
-              '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
-          type: '',
-          subtype: '',
-          amount: entry.value.$2.available ?? 0.0,
-        ),
-      );
+      Set<String> activeDates = {};
+
       double currentBalance = entry.value.$2.available ?? 0.0;
-      maxVal = math.max(maxVal, currentBalance);
-      minVal = math.min(minVal, currentBalance);
+      Map<String, double> dailyTransactions = {};
+
       for (final transaction in entry.value.$3) {
-        TransactionEntry newEntry = transaction.copy();
-        if (newEntry.date == transactionList.last.date) {
-          currentBalance += newEntry.amount;
-        } else {
-          final temp = newEntry.amount;
-          newEntry.amount = currentBalance;
-          transactionList.add(newEntry);
-          maxVal = math.max(maxVal, currentBalance);
-          minVal = math.min(minVal, currentBalance);
-          currentBalance += temp;
+        dailyTransactions[transaction.date] =
+            (dailyTransactions[transaction.date] ?? 0.0) + transaction.amount;
+        activeDates.add(transaction.date);
+      }
+
+      DateTime today = DateTime(now.year, now.month, now.day);
+      double balanceTracker = currentBalance;
+
+      for (int i = 0; i <= ApiService.interval; i++) {
+        DateTime currentDay = today.subtract(Duration(days: i));
+        String dateString =
+            '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
+
+        transactionList.add(
+          TransactionEntry(
+            id: '',
+            accountId: '',
+            name: '',
+            date: dateString,
+            type: '',
+            subtype: '',
+            amount: balanceTracker,
+          ),
+        );
+
+        maxVal = math.max(maxVal, balanceTracker);
+        minVal = math.min(minVal, balanceTracker);
+
+        if (dailyTransactions.containsKey(dateString)) {
+          balanceTracker += dailyTransactions[dateString]!;
         }
       }
 
-      DateTime first = now.subtract(Duration(days: ApiService.interval));
-      transactionList.add(
-        TransactionEntry(
-          id: '',
-          accountId: '',
-          name: '',
-          date:
-              '${first.year}-${first.month.toString().padLeft(2, '0')}-${first.day.toString().padLeft(2, '0')}',
-          type: '',
-          subtype: '',
-          amount: transactionList.last.amount,
-        ),
-      );
+      // Always add today to active dates so the most recent balance has a dot
+      String todayString =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      activeDates.add(todayString);
 
-      list.add((entry.value.$1, entry.value.$2, transactionList));
+      list.add((entry.value.$1, entry.value.$2, transactionList, activeDates));
     }
     dist = maxVal - minVal;
 
@@ -155,10 +156,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                 fitInsideHorizontally: true,
                 getTooltipItems: (List<LineBarSpot> touchedSpots) {
                   return touchedSpots.map((LineBarSpot touchedSpot) {
-                    (Item, Account, List<TransactionEntry>) entry = widget
-                        .groupedTransactions
-                        .toList()[touchedSpot.barIndex]
-                        .value;
+                    var entry = list[touchedSpot.barIndex];
 
                     final DateTime date = DateTime.fromMicrosecondsSinceEpoch(
                       touchedSpot.x.toInt(),
@@ -222,20 +220,49 @@ class _TransactionHistoryState extends State<TransactionHistory> {
             ),
             lineBarsData: [
               ...list.map((entry) {
+                final spots = entry.$3.map((transaction) {
+                  return FlSpot(
+                    DateTime.parse(
+                      transaction.date,
+                    ).microsecondsSinceEpoch.toDouble(),
+                    transaction.amount,
+                  );
+                }).toList();
+
+                // spots need to be sorted by x-axis for fl_chart, especially when using step lines
+                spots.sort((a, b) => a.x.compareTo(b.x));
+
                 return LineChartBarData(
-                  isCurved: true,
-                  curveSmoothness: 0.1,
+                  isCurved: false,
                   color: Theme.of(context).colorScheme.primary,
-                  spots: [
-                    ...entry.$3.map((transaction) {
-                      return FlSpot(
-                        DateTime.parse(
-                          transaction.date,
-                        ).microsecondsSinceEpoch.toDouble(),
-                        transaction.amount,
+                  barWidth: 2.5,
+                  dotData: FlDotData(
+                    show: true,
+                    getDotPainter: (spot, percent, barData, index) {
+                      DateTime date = DateTime.fromMicrosecondsSinceEpoch(
+                        spot.x.toInt(),
                       );
-                    }),
-                  ],
+                      String dateStr =
+                          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+                      // Only show dots on dates where a transaction occurred
+                      if (!entry.$4.contains(dateStr)) {
+                        return FlDotCirclePainter(
+                          radius: 0,
+                          color: Colors.transparent,
+                          strokeWidth: 0,
+                          strokeColor: Colors.transparent,
+                        );
+                      }
+                      return FlDotCirclePainter(
+                        radius: 4,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        strokeWidth: 2,
+                        strokeColor: Theme.of(context).colorScheme.primary,
+                      );
+                    },
+                  ),
+                  spots: spots,
                 );
               }),
             ],
