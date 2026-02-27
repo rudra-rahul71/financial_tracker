@@ -29,9 +29,9 @@ class _TransactionHistoryState extends State<TransactionHistory> {
 
     for(final entry in widget.groupedTransactions) {
       List<TransactionEntry> transactionList = [];
-      transactionList.add(TransactionEntry(id: '', accountId: '', name: '', date: '${now.year}-${now.month}-${now.day}',
-        type: '', subtype: '', amount: entry.value.$2.available!));
-      double currentBalance = entry.value.$2.available!;
+      transactionList.add(TransactionEntry(id: '', accountId: '', name: '', date: '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
+        type: '', subtype: '', amount: entry.value.$2.available ?? 0.0));
+      double currentBalance = entry.value.$2.available ?? 0.0;
       maxVal = math.max(maxVal, currentBalance);
       minVal = math.min(minVal, currentBalance);
       for(final transaction in entry.value.$3) {
@@ -49,7 +49,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
       }
 
       DateTime first = now.subtract(Duration(days: ApiService.interval));
-      transactionList.add(TransactionEntry(id: '', accountId: '', name: '', date: '${first.year}-${first.month > 9 ? '' : '0'}${first.month}-${first.day}',
+      transactionList.add(TransactionEntry(id: '', accountId: '', name: '', date: '${first.year}-${first.month.toString().padLeft(2, '0')}-${first.day.toString().padLeft(2, '0')}',
         type: '', subtype: '', amount: transactionList.last.amount));
 
       list.add((entry.value.$1, entry.value.$2, transactionList));

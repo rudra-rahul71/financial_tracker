@@ -28,11 +28,11 @@ class Account {
       id: json['account_id'],
       itemId: itemId,
       name: json['name'],
-      officialName: json['official_name'],
+      officialName: json['official_name'] ?? json['name'] ?? '',
       type: json['type'],
       subetype: json['subtype'],
-      available: (json['balances']['available'] as num).toDouble(),
-      current: (json['balances']['current'] as num).toDouble()
+      available: (json['balances']['available'] as num?)?.toDouble(),
+      current: (json['balances']['current'] as num?)?.toDouble()
     );
   }
 
@@ -65,8 +65,8 @@ class Account {
       officialName: map[columnOfficialName] as String,
       type: map[columnType] as String,
       subetype: map[columnSubtype] as String,
-      available: (map[columnAvailable] as num).toDouble(),
-      current: (map[columnCurrent] as num).toDouble(),
+      available: (map[columnAvailable] as num?)?.toDouble(),
+      current: (map[columnCurrent] as num?)?.toDouble(),
     );
   }
 }

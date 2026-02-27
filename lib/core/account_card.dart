@@ -113,8 +113,8 @@ class _AccountCardState extends State<AccountCard> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('Current: \$${account.current!.toStringAsFixed(2)}'),
-                      Text('Available: \$${account.available!.toStringAsFixed(2)}')
+                      Text('Current: \$${(account.current ?? 0.0).toStringAsFixed(2)}'),
+                      Text('Available: \$${(account.available ?? 0.0).toStringAsFixed(2)}')
                     ],
                   ),
                 ],

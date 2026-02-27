@@ -224,7 +224,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       total: _selectedTransactions.fold(
                         0.0,
                         (double previousSum, MapEntry<String, (Item, Account, List<TransactionEntry>)> entry)
-                          => previousSum + entry.value.$2.available!.toDouble(),
+                          => previousSum + (entry.value.$2.available ?? 0).toDouble(),
                       ),
                     ),
                   ),
