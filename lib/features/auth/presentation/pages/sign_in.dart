@@ -1,6 +1,6 @@
 import 'package:financial_tracker/main.dart';
-import 'package:financial_tracker/services/api_service.dart';
-import 'package:financial_tracker/services/snackbar.dart';
+import 'package:financial_tracker/core/network/api_service.dart';
+import 'package:financial_tracker/core/utils/snackbar.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

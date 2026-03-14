@@ -1,4 +1,4 @@
-import 'package:financial_tracker/core/page_header.dart';
+import 'package:financial_tracker/core/widgets/page_header.dart';
 import 'package:flutter/material.dart';
 
 class BudgetsPage extends StatefulWidget {

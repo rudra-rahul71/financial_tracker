@@ -1,12 +1,12 @@
-import 'package:financial_tracker/core/account_card.dart';
-import 'package:financial_tracker/core/net_worth.dart';
-import 'package:financial_tracker/core/page_header.dart';
+import 'package:financial_tracker/features/accounts/presentation/widgets/account_card.dart';
+import 'package:financial_tracker/core/widgets/net_worth.dart';
+import 'package:financial_tracker/core/widgets/page_header.dart';
 import 'package:financial_tracker/main.dart';
-import 'package:financial_tracker/models/account.dart';
-import 'package:financial_tracker/models/item.dart';
-import 'package:financial_tracker/services/api_service.dart';
-import 'package:financial_tracker/services/db_service.dart';
-import 'package:financial_tracker/services/snackbar.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/account.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
+import 'package:financial_tracker/core/network/api_service.dart';
+import 'package:financial_tracker/core/database/db_service.dart';
+import 'package:financial_tracker/core/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 

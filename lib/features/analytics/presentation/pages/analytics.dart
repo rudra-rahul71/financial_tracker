@@ -1,12 +1,12 @@
-import 'package:financial_tracker/core/basic_card.dart';
+import 'package:financial_tracker/core/widgets/basic_card.dart';
 import 'package:financial_tracker/core/charts/category_spending.dart';
 import 'package:financial_tracker/core/charts/distribution_pie.dart';
-import 'package:financial_tracker/core/day_dropdown.dart';
-import 'package:financial_tracker/core/page_header.dart';
+import 'package:financial_tracker/core/widgets/day_dropdown.dart';
+import 'package:financial_tracker/core/widgets/page_header.dart';
 import 'package:financial_tracker/main.dart';
-import 'package:financial_tracker/models/transaction.dart';
-import 'package:financial_tracker/services/api_service.dart';
-import 'package:financial_tracker/services/db_service.dart';
+import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
+import 'package:financial_tracker/core/network/api_service.dart';
+import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsPage extends StatefulWidget {

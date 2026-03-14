@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:financial_tracker/models/account.dart';
-import 'package:financial_tracker/models/connection.dart';
-import 'package:financial_tracker/models/item.dart';
-import 'package:financial_tracker/models/transaction.dart';
-import 'package:financial_tracker/services/db_service.dart';
-import 'package:financial_tracker/services/snackbar.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/account.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/connection.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
+import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
+import 'package:financial_tracker/core/database/db_service.dart';
+import 'package:financial_tracker/core/utils/snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;

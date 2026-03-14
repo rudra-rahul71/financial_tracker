@@ -1,4 +1,4 @@
-import 'package:financial_tracker/models/transaction.dart';
+import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
 import 'package:flutter/material.dart';
 
 class TransactionTable extends StatefulWidget {

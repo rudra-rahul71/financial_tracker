@@ -1,5 +1,5 @@
-import 'package:financial_tracker/models/account.dart';
-import 'package:financial_tracker/models/item.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/account.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
 import 'package:flutter/material.dart';
 
 class AccountCard extends StatefulWidget {
