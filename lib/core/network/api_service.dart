@@ -13,8 +13,12 @@ import 'package:http/http.dart' as http;
 import 'package:plaid_flutter/plaid_flutter.dart';
 
 class ApiService {
-  // final String host = 'http://10.0.2.2:8080';
-  final String host = 'http://localhost:8080';
+  // The host URL can be injected at build time, e.g.
+  // flutter build --dart-define=API_HOST=http://10.0.2.2:8080
+  final String host = const String.fromEnvironment(
+    'API_HOST',
+    defaultValue: 'http://localhost:8080',
+  );
 
   final DatabaseService _databaseService = DatabaseService.instance;
 
@@ -28,7 +32,8 @@ class ApiService {
   }
 
   Future<void> searchAccounts(BuildContext context) async {
-    final user = FirebaseAuth.instance.currentUser!;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
     final idToken = await user.getIdToken();
 
     final headers = {
@@ -39,9 +44,11 @@ class ApiService {
     final url = Uri.parse('$host/search/$_interval');
 
     final response = await http.get(url, headers: headers);
-    if(response.statusCode != 200) {
-      if(context.mounted) {
-        SnackbarService(context).showErrorSnackbar(message: 'Please connect account to view financial data!');
+    if (response.statusCode != 200) {
+      if (context.mounted) {
+        SnackbarService(context).showErrorSnackbar(
+          message: 'Please connect account to view financial data!',
+        );
       }
     } else {
       final data = json.decode(response.body);
@@ -49,26 +56,32 @@ class ApiService {
       _databaseService.clearTable(Item.tableName);
       _databaseService.clearTable(Account.tableName);
       _databaseService.clearTable(TransactionEntry.tableName);
-      for(final connection in connections) {
+      for (final connection in connections) {
         _databaseService.updateTable(Item.tableName, connection.item);
-        for(final account in connection.accounts) {
+        for (final account in connection.accounts) {
           _databaseService.updateTable(Account.tableName, account);
         }
-        for(final transaction in connection.transactions) {
+        for (final transaction in connection.transactions) {
           _databaseService.updateTable(TransactionEntry.tableName, transaction);
         }
       }
 
-      if(connections.isEmpty) {
-        if(context.mounted) {
-          SnackbarService(context).showErrorSnackbar(message: 'Please connect account to view financial data!');
+      if (connections.isEmpty) {
+        if (context.mounted) {
+          SnackbarService(context).showErrorSnackbar(
+            message: 'Please connect account to view financial data!',
+          );
         }
       }
     }
   }
 
-  Future<void> createPlaidAccessToken(BuildContext context, String publicToken) async {
-    final user = FirebaseAuth.instance.currentUser!;
+  Future<void> createPlaidAccessToken(
+    BuildContext context,
+    String publicToken,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
     final idToken = await user.getIdToken();
 
     final headers = {
@@ -81,19 +94,24 @@ class ApiService {
     final response = await http.get(url, headers: headers);
 
     if (response.statusCode == 200) {
-      if(context.mounted) {
-        SnackbarService(context).showSuccessSnackbar(message: 'Successfully to connected to bank!');
+      if (context.mounted) {
+        SnackbarService(
+          context,
+        ).showSuccessSnackbar(message: 'Successfully to connected to bank!');
       }
     } else {
-      if(context.mounted) {
-        SnackbarService(context).showErrorSnackbar(message: 'Failed to connect to bank!');
+      if (context.mounted) {
+        SnackbarService(
+          context,
+        ).showErrorSnackbar(message: 'Failed to connect to bank!');
       }
     }
   }
 
   Future<dynamic> initPlaidIntegration(BuildContext context) async {
     try {
-      final user = FirebaseAuth.instance.currentUser!;
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception("User not logged in");
       final idToken = await user.getIdToken();
 
       final headers = {
@@ -109,8 +127,8 @@ class ApiService {
         await _onExitSubscription?.cancel();
         final data = json.decode(resopnse.body);
         LinkTokenConfiguration configuration = LinkTokenConfiguration(
-            token: data['link_token'],
-            noLoadingState: true,
+          token: data['link_token'],
+          noLoadingState: true,
         );
         await PlaidLink.create(configuration: configuration);
         await PlaidLink.open();
@@ -119,13 +137,17 @@ class ApiService {
           PlaidLink.onExit.first,
         ]);
       } else {
-        if(context.mounted) {
-          SnackbarService(context).showErrorSnackbar(message: 'Failed to initiate connection process!');
+        if (context.mounted) {
+          SnackbarService(context).showErrorSnackbar(
+            message: 'Failed to initiate connection process!',
+          );
         }
       }
     } catch (e) {
-      if(context.mounted) {
-        SnackbarService(context).showErrorSnackbar(message: 'Failed to initiate connection process!');
+      if (context.mounted) {
+        SnackbarService(
+          context,
+        ).showErrorSnackbar(message: 'Failed to initiate connection process!');
       }
     }
     return null;

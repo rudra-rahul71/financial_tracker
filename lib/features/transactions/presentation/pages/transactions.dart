@@ -82,10 +82,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
       }
 
       final Account? accoount = await _databaseService.getAccountById(transaction.accountId);
-      final Item? item = await _databaseService.getItemById(accoount!.itemId);
+      if (accoount == null) continue;
+
+      final Item? item = await _databaseService.getItemById(accoount.itemId);
+      if (item == null) continue;
 
       groupedTransactions
-        .putIfAbsent(transaction.accountId, () => (item!, accoount, [])).$3
+        .putIfAbsent(transaction.accountId, () => (item, accoount, [])).$3
         .add(transaction);
     }
     setState(() {
