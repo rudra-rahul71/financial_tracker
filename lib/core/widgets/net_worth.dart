@@ -32,7 +32,7 @@ class NetWorth extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$$totalValue',
+                    '\$${totalValue.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
