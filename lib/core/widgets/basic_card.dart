@@ -30,16 +30,13 @@ class _BasicCardState extends State<BasicCard> {
               alignment: WrapAlignment.spaceBetween,
               runSpacing: 20.0,
               spacing: 20.0,
-              children: [
-                Text(widget.title),
-                ?widget.action,
-              ]
+              children: [Text(widget.title), ?widget.action],
             ),
             const SizedBox(height: 12.0),
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: 250),
               child: widget.body,
-            )
+            ),
           ],
         ),
       ),
@@ -56,14 +53,14 @@ class InfoCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.value,
-    this.color
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child:  Container(
+      child: Container(
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
@@ -82,10 +79,7 @@ class InfoCard extends StatelessWidget {
           children: <Widget>[
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 12),
             Text(

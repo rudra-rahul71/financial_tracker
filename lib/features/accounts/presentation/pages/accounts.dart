@@ -31,18 +31,20 @@ class _AccountsPageState extends State<AccountsPage> {
     });
 
     dynamic resopnse = await _apiService.initPlaidIntegration(context);
-    if(resopnse != null && context.mounted && resopnse is LinkSuccess) {
+    if (resopnse != null && context.mounted && resopnse is LinkSuccess) {
       final publicToken = resopnse.toJson()['publicToken'];
       await _apiService.createPlaidAccessToken(context, publicToken);
 
-      if(context.mounted) {
+      if (context.mounted) {
         await _apiService.searchAccounts(context);
       }
 
       await _updateAccounts();
     } else {
-      if(context.mounted) {
-        SnackbarService(context).showErrorSnackbar(message: 'Failed to connect to bank!');
+      if (context.mounted) {
+        SnackbarService(
+          context,
+        ).showErrorSnackbar(message: 'Failed to connect to bank!');
       }
     }
 
@@ -57,26 +59,27 @@ class _AccountsPageState extends State<AccountsPage> {
     _totalAccounts = accounts.length;
     _totalValue = accounts.fold(
       0.0,
-      (double previousSum, Account account) => previousSum + (account.available ?? 0.0),
+      (double previousSum, Account account) =>
+          previousSum + (account.available ?? 0.0),
     );
 
     Map<String, (Item, List<Account>)> groupedAccounts = {};
-      for (final account in accounts) {
-        final itemId = account.itemId;
+    for (final account in accounts) {
+      final itemId = account.itemId;
 
-        _databaseService.getItemById(itemId);
-        final item = await _databaseService.getItemById(itemId);
-        
-        if (item == null) {
-          continue; 
-        }
+      _databaseService.getItemById(itemId);
+      final item = await _databaseService.getItemById(itemId);
 
-        groupedAccounts.update(
-          itemId,
-          (existingTuple) => (existingTuple.$1, [...existingTuple.$2, account]),
-          ifAbsent: () => (item, [account]),
-        );
+      if (item == null) {
+        continue;
       }
+
+      groupedAccounts.update(
+        itemId,
+        (existingTuple) => (existingTuple.$1, [...existingTuple.$2, account]),
+        ifAbsent: () => (item, [account]),
+      );
+    }
 
     setState(() {
       _connections = groupedAccounts.entries;
@@ -86,7 +89,7 @@ class _AccountsPageState extends State<AccountsPage> {
   @override
   void initState() {
     super.initState();
-    
+
     _updateAccounts();
   }
 
@@ -97,7 +100,9 @@ class _AccountsPageState extends State<AccountsPage> {
       child: Column(
         // crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          PageHeader(header: 'Accounts', sub: 'Manage your financial accounts', 
+          PageHeader(
+            header: 'Accounts',
+            sub: 'Manage your financial accounts',
             action: ElevatedButton.icon(
               onPressed: () {
                 _initPlaidIntegration(context);
@@ -105,9 +110,7 @@ class _AccountsPageState extends State<AccountsPage> {
               icon: const Icon(Icons.add, size: 20),
               label: const Text(
                 'Add Account',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -115,24 +118,34 @@ class _AccountsPageState extends State<AccountsPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
               ),
             ),
           ),
-          Expanded(child: Center(child:
-            _loading ? CircularProgressIndicator() :
-            _connections.isEmpty ? Text('No Accounts') :
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  NetWorth(totalAccounts: _totalAccounts, totalValue: _totalValue),
-                  ..._connections.map((account) {
-                    return AccountCard(connection: account);
-                  }),
-                ],
-              ),
+          Expanded(
+            child: Center(
+              child: _loading
+                  ? CircularProgressIndicator()
+                  : _connections.isEmpty
+                  ? Text('No Accounts')
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          NetWorth(
+                            totalAccounts: _totalAccounts,
+                            totalValue: _totalValue,
+                          ),
+                          ..._connections.map((account) {
+                            return AccountCard(connection: account);
+                          }),
+                        ],
+                      ),
+                    ),
             ),
-          )),
+          ),
         ],
       ),
     );

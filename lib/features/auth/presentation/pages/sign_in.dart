@@ -13,14 +13,16 @@ class SignInPage extends StatelessWidget {
   static AuthStateChangeAction<UserCreated> _userCreated() {
     return AuthStateChangeAction<UserCreated>((context, state) {
       context.push('/auth/verify-email');
-      SnackbarService(context).showSuccessSnackbar(message: 'User successfully created!');
+      SnackbarService(
+        context,
+      ).showSuccessSnackbar(message: 'User successfully created!');
     });
   }
 
   AuthStateChangeAction<SignedIn> _userSignIn() {
     return AuthStateChangeAction<SignedIn>((context, state) async {
       await _apiService.searchAccounts(context);
-      if(context.mounted) {
+      if (context.mounted) {
         context.push('/home');
       }
     });
@@ -30,10 +32,7 @@ class SignInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return SignInScreen(
       providers: [EmailAuthProvider()],
-      actions: [
-        _userCreated(),
-        _userSignIn(),
-      ],
+      actions: [_userCreated(), _userSignIn()],
     );
   }
 }

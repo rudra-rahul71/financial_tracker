@@ -7,7 +7,7 @@ class NetWorth extends StatelessWidget {
   const NetWorth({
     super.key,
     required this.totalAccounts,
-    required this.totalValue
+    required this.totalValue,
   });
 
   @override
@@ -25,10 +25,7 @@ class NetWorth extends StatelessWidget {
                 children: [
                   const Text(
                     'Total Net Worth',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -56,7 +53,10 @@ class NetWorth extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
-                  colors: [Theme.of(context).colorScheme.onPrimaryFixed, Theme.of(context).colorScheme.onPrimary],
+                  colors: [
+                    Theme.of(context).colorScheme.onPrimaryFixed,
+                    Theme.of(context).colorScheme.onPrimary,
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -67,12 +67,7 @@ class NetWorth extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.show_chart,
-                  size: 28,
-                ),
-              ),
+              child: const Center(child: Icon(Icons.show_chart, size: 28)),
             ),
           ],
         ),

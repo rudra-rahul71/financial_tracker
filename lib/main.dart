@@ -22,11 +22,10 @@ final getIt = GetIt.instance;
 void setupLocator() {
   getIt.registerLazySingleton<ApiService>(() => ApiService());
 }
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   setupLocator();
   runApp(MyApp());
 }
@@ -43,7 +42,9 @@ class MyApp extends StatelessWidget {
           title: 'Finance Tracker',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.green, brightness: Brightness.dark),
+              seedColor: Colors.green,
+              brightness: Brightness.dark,
+            ),
             useMaterial3: true,
           ),
           routerConfig: _router,
@@ -53,10 +54,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-const List<String> publicRoutes = [
-  '/',
-  '/auth/sign-in',
-];
+const List<String> publicRoutes = ['/', '/auth/sign-in'];
 
 const String verifyEmailRoute = '/auth/verify-email';
 
@@ -86,7 +84,7 @@ final GoRouter _router = GoRouter(
   routes: <RouteBase>[
     ShellRoute(
       builder: (BuildContext context, GoRouterState state, Widget child) {
-        if(state.fullPath == '/' || state.fullPath!.startsWith('/auth')) {
+        if (state.fullPath == '/' || state.fullPath!.startsWith('/auth')) {
           return child;
         }
         return NavigatorScafold(child: child);

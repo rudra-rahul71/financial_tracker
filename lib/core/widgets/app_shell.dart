@@ -3,11 +3,8 @@ import 'package:go_router/go_router.dart';
 
 class NavigatorScafold extends StatefulWidget {
   final Widget child;
-  
-  const NavigatorScafold({
-    super.key,
-    required this.child,
-  });
+
+  const NavigatorScafold({super.key, required this.child});
 
   @override
   State<NavigatorScafold> createState() => _NavigatorScafoldState();
@@ -66,7 +63,9 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
               groupAlignment: -1.0,
               destinations: <NavigationRailDestination>[
                 NavigationRailDestination(
-                  icon: extendRail ? const Icon(Icons.menu_open) : const Icon(Icons.menu),
+                  icon: extendRail
+                      ? const Icon(Icons.menu_open)
+                      : const Icon(Icons.menu),
                   label: const Text('Financial Tracker'),
                 ),
                 const NavigationRailDestination(
@@ -99,7 +98,7 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
                 ),
               ],
               onDestinationSelected: (int index) {
-                if(index == 0) {
+                if (index == 0) {
                   _toggleRail();
                 } else {
                   _navigate(index, context);
@@ -107,9 +106,7 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
               },
             ),
             const VerticalDivider(thickness: 1, width: 1),
-            Expanded(
-              child: widget.child,
-            ),
+            Expanded(child: widget.child),
           ],
         ),
       ),

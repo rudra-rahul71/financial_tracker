@@ -20,7 +20,7 @@ class Account {
     required this.type,
     required this.subetype,
     this.available,
-    this.current
+    this.current,
   });
 
   factory Account.fromJson(String itemId, Map<String, dynamic> json) {
@@ -32,13 +32,13 @@ class Account {
       type: json['type'],
       subetype: json['subtype'],
       available: (json['balances']['available'] as num?)?.toDouble(),
-      current: (json['balances']['current'] as num?)?.toDouble()
+      current: (json['balances']['current'] as num?)?.toDouble(),
     );
   }
 
   static List<Account> fromJsonList(String itemId, List<dynamic> jsonList) {
     final List<Account> accounts = [];
-    for(final account in jsonList) {
+    for (final account in jsonList) {
       accounts.add(Account.fromJson(itemId, account));
     }
     return accounts;
@@ -48,12 +48,12 @@ class Account {
     return {
       columnId: id,
       columnItemId: itemId,
-      columnName: name, 
+      columnName: name,
       columnOfficialName: officialName,
       columnType: type,
       columnSubtype: subetype,
       columnAvailable: available,
-      columnCurrent: current
+      columnCurrent: current,
     };
   }
 

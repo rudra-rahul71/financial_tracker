@@ -8,7 +8,8 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -43,10 +44,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: Image.asset(
-            'assets/images/logo.png',
-            width: 250,
-          ),
+          child: Image.asset('assets/images/logo.png', width: 250),
         ),
       ),
     );

@@ -10,8 +10,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void _updateDays(int days) {
-  }
+  void _updateDays(int days) {}
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +19,12 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          PageHeader(header: 'Home', sub: 'Your financial overview at a glance',
-            action: DayDropdown(daysUpdated: _updateDays,)),
-          Expanded(child: Center(child: Text('No Analytics'),))
+          PageHeader(
+            header: 'Home',
+            sub: 'Your financial overview at a glance',
+            action: DayDropdown(daysUpdated: _updateDays),
+          ),
+          Expanded(child: Center(child: Text('No Analytics'))),
         ],
       ),
     );

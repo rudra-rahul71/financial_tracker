@@ -8,7 +8,7 @@ class VerifyEmailPage extends StatelessWidget {
   static AuthCancelledAction _cancel() {
     return AuthCancelledAction((context) {
       FirebaseUIAuth.signOut(context: context).then((value) {
-        if (context.mounted) { 
+        if (context.mounted) {
           context.pop();
         }
       });
@@ -23,11 +23,6 @@ class VerifyEmailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return EmailVerificationScreen(
-      actions: [
-        _cancel(),
-        _verified(context),
-      ],
-    );
+    return EmailVerificationScreen(actions: [_cancel(), _verified(context)]);
   }
 }

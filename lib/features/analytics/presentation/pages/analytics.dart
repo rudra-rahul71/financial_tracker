@@ -38,14 +38,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   Future<void> _updateTransactions() async {
     final Map<String, double> groupedTransactions = {};
 
-    List<TransactionEntry> transactions = await _databaseService.getTransactions();
-    for(final transaction in transactions) {
-      if(transaction.amount > 0) {
+    List<TransactionEntry> transactions = await _databaseService
+        .getTransactions();
+    for (final transaction in transactions) {
+      if (transaction.amount > 0) {
         groupedTransactions.putIfAbsent(transaction.type, () => 0.0);
 
         double currentValue = groupedTransactions[transaction.type]!;
         double newValue = currentValue + transaction.amount;
-          
+
         if (newValue == 0) {
           groupedTransactions.remove(transaction.type);
         } else {
@@ -76,19 +77,34 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: <Widget>[
-          PageHeader(header: 'Analytics', sub: 'Deep insights into your spending patterns',
-            action: DayDropdown(daysUpdated: _updateDays)),
-          Expanded(child:
-            _loading ? Center(child: CircularProgressIndicator()) :
-            _transactionByCategory.isEmpty ? Center(child: Text('No Analytics')) :
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  BasicCard(title: 'Distribution', body: DistributionPieChart(groupedTransactions: _transactionByCategory)),
-                  BasicCard(title: 'Spending by Category', body: CategorySpending(groupedTransactions: _transactionByCategory)),
-                ],
-              ),
-            ),
+          PageHeader(
+            header: 'Analytics',
+            sub: 'Deep insights into your spending patterns',
+            action: DayDropdown(daysUpdated: _updateDays),
+          ),
+          Expanded(
+            child: _loading
+                ? Center(child: CircularProgressIndicator())
+                : _transactionByCategory.isEmpty
+                ? Center(child: Text('No Analytics'))
+                : SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        BasicCard(
+                          title: 'Distribution',
+                          body: DistributionPieChart(
+                            groupedTransactions: _transactionByCategory,
+                          ),
+                        ),
+                        BasicCard(
+                          title: 'Spending by Category',
+                          body: CategorySpending(
+                            groupedTransactions: _transactionByCategory,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),

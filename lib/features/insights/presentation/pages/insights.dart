@@ -16,8 +16,11 @@ class _InsightsPageState extends State<InsightsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          PageHeader(header: 'Insights', sub: 'Personalized recommendations and financial insights'),
-          Expanded(child: Center(child: Text('No Insights'),))
+          PageHeader(
+            header: 'Insights',
+            sub: 'Personalized recommendations and financial insights',
+          ),
+          Expanded(child: Center(child: Text('No Insights'))),
         ],
       ),
     );

@@ -9,7 +9,7 @@ class PageHeader extends StatefulWidget {
     super.key,
     required this.header,
     required this.sub,
-    this.action, 
+    this.action,
   });
 
   @override
@@ -50,7 +50,7 @@ class _PageHeaderState extends State<PageHeader> {
             ?widget.action,
           ],
         ),
-      )
+      ),
     );
   }
 }

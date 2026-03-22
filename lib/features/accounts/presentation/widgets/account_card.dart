@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 
 class AccountCard extends StatefulWidget {
   final MapEntry<String, (Item, List<Account>)> connection;
-  const AccountCard({
-    super.key,
-    required this.connection
-  });
+  const AccountCard({super.key, required this.connection});
 
   @override
   State<AccountCard> createState() => _AccountCardState();
@@ -15,7 +12,9 @@ class AccountCard extends StatefulWidget {
 
 class _AccountCardState extends State<AccountCard> {
   late final _totalValue = widget.connection.value.$2.fold(
-    0.0, (double previousSum, Account account) => previousSum + (account.available ?? 0.0),
+    0.0,
+    (double previousSum, Account account) =>
+        previousSum + (account.available ?? 0.0),
   );
 
   @override
@@ -59,7 +58,9 @@ class _AccountCardState extends State<AccountCard> {
                               '${widget.connection.value.$2.length} accounts',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Theme.of(context).colorScheme.inversePrimary,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.inversePrimary,
                               ),
                             ),
                           ],
@@ -74,10 +75,7 @@ class _AccountCardState extends State<AccountCard> {
                   children: <Widget>[
                     const Text(
                       'Total Balance',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     Text(
                       '\$${_totalValue.toStringAsFixed(2)}',
@@ -96,28 +94,33 @@ class _AccountCardState extends State<AccountCard> {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(account.name),
-                      Text(account.subetype,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.inversePrimary
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(account.name),
+                        Text(
+                          account.subetype,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                          ),
                         ),
-                      )
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('Current: \$${(account.current ?? 0.0).toStringAsFixed(2)}'),
-                      Text('Available: \$${(account.available ?? 0.0).toStringAsFixed(2)}')
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Current: \$${(account.current ?? 0.0).toStringAsFixed(2)}',
+                        ),
+                        Text(
+                          'Available: \$${(account.available ?? 0.0).toStringAsFixed(2)}',
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               );
             }),

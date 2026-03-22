@@ -22,8 +22,10 @@ class TransactionsPage extends StatefulWidget {
 class _TransactionsPageState extends State<TransactionsPage> {
   final DatabaseService _databaseService = DatabaseService.instance;
   final ApiService _apiService = getIt<ApiService>();
-  Iterable<MapEntry<String, (Item, Account, List<TransactionEntry>)>> _groupedTransactions = [];
-  Iterable<MapEntry<String, (Item, Account, List<TransactionEntry>)>> _selectedTransactions = [];
+  Iterable<MapEntry<String, (Item, Account, List<TransactionEntry>)>>
+  _groupedTransactions = [];
+  Iterable<MapEntry<String, (Item, Account, List<TransactionEntry>)>>
+  _selectedTransactions = [];
   List<TransactionEntry> transactions = [];
   String category = 'Balance';
   bool _loading = false;
@@ -38,9 +40,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
     avgTransactions = 0;
     totalTransactions = 0;
 
-    for(final entry in _selectedTransactions) {
-      for(final transaction in entry.value.$3) {
-        if(transaction.amount > 0) {
+    for (final entry in _selectedTransactions) {
+      for (final transaction in entry.value.$3) {
+        if (transaction.amount > 0) {
           totalSpent += transaction.amount;
           totalTransactions++;
         } else {
@@ -67,29 +69,35 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   void _updateTransactionGroup(String key) {
     setState(() {
-      _selectedTransactions = key == '1' ? _groupedTransactions : [_groupedTransactions.firstWhere((e) => e.key == key)];
+      _selectedTransactions = key == '1'
+          ? _groupedTransactions
+          : [_groupedTransactions.firstWhere((e) => e.key == key)];
       _updateInfoCards();
     });
   }
 
   Future<void> _updateTransactions() async {
-    final Map<String, (Item, Account, List<TransactionEntry>)> groupedTransactions = {};
+    final Map<String, (Item, Account, List<TransactionEntry>)>
+    groupedTransactions = {};
     transactions = await _databaseService.getTransactions();
 
-    for(final transaction in transactions) {
+    for (final transaction in transactions) {
       if (transaction.accountId.isEmpty || transaction.date.isEmpty) {
-        continue; 
+        continue;
       }
 
-      final Account? accoount = await _databaseService.getAccountById(transaction.accountId);
+      final Account? accoount = await _databaseService.getAccountById(
+        transaction.accountId,
+      );
       if (accoount == null) continue;
 
       final Item? item = await _databaseService.getItemById(accoount.itemId);
       if (item == null) continue;
 
       groupedTransactions
-        .putIfAbsent(transaction.accountId, () => (item, accoount, [])).$3
-        .add(transaction);
+          .putIfAbsent(transaction.accountId, () => (item, accoount, []))
+          .$3
+          .add(transaction);
     }
     setState(() {
       _groupedTransactions = groupedTransactions.entries;
@@ -106,8 +114,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
           initialValue: category,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Theme.of(context).colorScheme.onPrimary, 
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            fillColor: Theme.of(context).colorScheme.onPrimary,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 10,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),
               borderSide: BorderSide.none,
@@ -118,15 +129,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
               category = newValue!;
             });
           },
-          items: ['Balance', 'Spending'].map<DropdownMenuItem<String>>((String value) {
+          items: ['Balance', 'Spending'].map<DropdownMenuItem<String>>((
+            String value,
+          ) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 12,
-                ),
-              ),
+              child: Text(value, style: const TextStyle(fontSize: 12)),
             );
           }).toList(),
           dropdownColor: Theme.of(context).colorScheme.onPrimary,
@@ -149,91 +157,151 @@ class _TransactionsPageState extends State<TransactionsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          PageHeader(header: 'Transactions', sub: 'Track and manage all your transactions',
-            action: DayDropdown(daysUpdated: _updateDays,)),
-          Expanded(child:
-            _loading ? Center(child: CircularProgressIndicator()) :
-            transactions.isEmpty ? Center(child: Text('No Analytics')) :
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IntrinsicWidth(
-                        child: SizedBox(
-                          height: 40,
-                          child: DropdownButtonFormField<String>(
-                            initialValue: '1',
-                            dropdownColor: Theme.of(context).colorScheme.onPrimary,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Theme.of(context).colorScheme.onPrimary, 
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            onChanged: (String? key) {
-                              _updateTransactionGroup(key!);
-                            },
-                            items: [
-                              DropdownMenuItem<String>(
-                                value: '1',
-                                child: Text(
-                                  'All Accounts',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                              ..._groupedTransactions.map<DropdownMenuItem<String>>((MapEntry<String, (Item, Account, List<TransactionEntry>)> value) {
-                                return DropdownMenuItem<String>(
-                                  value: value.key,
-                                  child: Text(
-                                    '${value.value.$1.name} - ${value.value.$2.name}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
+          PageHeader(
+            header: 'Transactions',
+            sub: 'Track and manage all your transactions',
+            action: DayDropdown(daysUpdated: _updateDays),
+          ),
+          Expanded(
+            child: _loading
+                ? Center(child: CircularProgressIndicator())
+                : transactions.isEmpty
+                ? Center(child: Text('No Analytics'))
+                : SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IntrinsicWidth(
+                              child: SizedBox(
+                                height: 40,
+                                child: DropdownButtonFormField<String>(
+                                  initialValue: '1',
+                                  dropdownColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 10,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      borderSide: BorderSide.none,
                                     ),
                                   ),
-                                );
-                              }),
+                                  onChanged: (String? key) {
+                                    _updateTransactionGroup(key!);
+                                  },
+                                  items: [
+                                    DropdownMenuItem<String>(
+                                      value: '1',
+                                      child: Text(
+                                        'All Accounts',
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                    ..._groupedTransactions.map<
+                                      DropdownMenuItem<String>
+                                    >((
+                                      MapEntry<
+                                        String,
+                                        (Item, Account, List<TransactionEntry>)
+                                      >
+                                      value,
+                                    ) {
+                                      return DropdownMenuItem<String>(
+                                        value: value.key,
+                                        child: Text(
+                                          '${value.value.$1.name} - ${value.value.$2.name}',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              InfoCard(
+                                title: 'Total Spent',
+                                value: '\$${totalSpent.toStringAsFixed(2)}',
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.errorContainer,
+                              ),
+                              InfoCard(
+                                title: 'Total Income',
+                                value: '\$${totalIncome.toStringAsFixed(2)}',
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer,
+                              ),
+                              InfoCard(
+                                title: 'Avg Transaction',
+                                value:
+                                    '\$${avgTransactions.abs().toStringAsFixed(2)}',
+                              ),
+                              InfoCard(
+                                title: 'Total Transactions',
+                                value: totalTransactions.toString(),
+                              ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        InfoCard(title: 'Total Spent', value: '\$${totalSpent.toStringAsFixed(2)}', color: Theme.of(context).colorScheme.errorContainer,),
-                        InfoCard(title: 'Total Income', value: '\$${totalIncome.toStringAsFixed(2)}', color: Theme.of(context).colorScheme.primaryContainer),
-                        InfoCard(title: 'Avg Transaction', value: '\$${avgTransactions.abs().toStringAsFixed(2)}'),
-                        InfoCard(title: 'Total Transactions', value: totalTransactions.toString()),
+                        SizedBox(height: 12),
+                        category == 'Balance'
+                            ? BasicCard(
+                                title: 'Balance History',
+                                body: TransactionHistory(
+                                  groupedTransactions: _selectedTransactions,
+                                ),
+                                action: categoryDropdown(),
+                              )
+                            : BasicCard(
+                                title: 'Track Spending',
+                                body: SpendingTracker(
+                                  transactions: _selectedTransactions
+                                      .expand((entry) => entry.value.$3)
+                                      .toList(),
+                                ),
+                                action: categoryDropdown(),
+                              ),
+                        BasicCard(
+                          title: 'All Transactions',
+                          body: TransactionTable(
+                            transactions: _selectedTransactions
+                                .expand((entry) => entry.value.$3)
+                                .toList(),
+                            total: _selectedTransactions.fold(
+                              0.0,
+                              (
+                                double previousSum,
+                                MapEntry<
+                                  String,
+                                  (Item, Account, List<TransactionEntry>)
+                                >
+                                entry,
+                              ) =>
+                                  previousSum +
+                                  (entry.value.$2.available ?? 0).toDouble(),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 12),
-                  category == 'Balance' ?
-                    BasicCard(title: 'Balance History', body: TransactionHistory(groupedTransactions: _selectedTransactions), action: categoryDropdown()) :
-                    BasicCard(title: 'Track Spending', body: SpendingTracker(transactions: _selectedTransactions.expand((entry) => entry.value.$3).toList()), action: categoryDropdown()),
-                  BasicCard(title: 'All Transactions', 
-                    body: TransactionTable(
-                      transactions: _selectedTransactions.expand((entry) => entry.value.$3).toList(),
-                      total: _selectedTransactions.fold(
-                        0.0,
-                        (double previousSum, MapEntry<String, (Item, Account, List<TransactionEntry>)> entry)
-                          => previousSum + (entry.value.$2.available ?? 0).toDouble(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),

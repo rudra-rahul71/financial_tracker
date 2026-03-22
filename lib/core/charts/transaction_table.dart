@@ -19,14 +19,14 @@ class _TransactionTableState extends State<TransactionTable> {
   List<(TransactionEntry, double)> balanceTracker = [];
 
   getLabel(String value) {
-    return switch(value) {
+    return switch (value) {
       "GENERAL_MERCHANDISE" => "Shopping",
       "FOOD_AND_DRINK" => "Food",
       "ENTERTAINMENT" => "Leisure",
       "PERSONAL_CARE" => "Personal",
       "LOAN_PAYMENTS" => "Loans",
       "TRANSPORTATION" => "Travel",
-      _ => formatSnakeCaseToTitle(value)
+      _ => formatSnakeCaseToTitle(value),
     };
   }
 
@@ -34,18 +34,30 @@ class _TransactionTableState extends State<TransactionTable> {
     if (input.isEmpty) return "";
 
     return input
-      .split('_').map((word) {
-        if (word.isEmpty) return "";
-        return word[0].toUpperCase() + word.substring(1).toLowerCase();
-      }).join(' ');
+        .split('_')
+        .map((word) {
+          if (word.isEmpty) return "";
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
 
     const List<String> monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
 
     String month = monthNames[dateTime.month - 1];
@@ -56,18 +68,23 @@ class _TransactionTableState extends State<TransactionTable> {
   }
 
   void _updateTransactions() {
-    widget.transactions.sort((a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)));
+    widget.transactions.sort(
+      (a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)),
+    );
 
     balanceTracker = [(widget.transactions.first, widget.total)];
-    for(int i = 1; i < widget.transactions.length; i++) {
-      balanceTracker.add((widget.transactions[i], balanceTracker[i - 1].$2 + widget.transactions[i - 1].amount));
+    for (int i = 1; i < widget.transactions.length; i++) {
+      balanceTracker.add((
+        widget.transactions[i],
+        balanceTracker[i - 1].$2 + widget.transactions[i - 1].amount,
+      ));
     }
   }
 
   @override
   void initState() {
     super.initState();
-    
+
     setState(() {
       _updateTransactions();
     });
@@ -85,37 +102,17 @@ class _TransactionTableState extends State<TransactionTable> {
   }
 
   @override
-    Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
           columns: const <DataColumn>[
-            DataColumn(
-              label: Expanded(
-                child: Text('Date'),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Text('Merchant'),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Text('Category'),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Text('Amount'),
-              ),
-            ),
-            DataColumn(
-              label: Expanded(
-                child: Text('Balance'),
-              ),
-            ),
+            DataColumn(label: Expanded(child: Text('Date'))),
+            DataColumn(label: Expanded(child: Text('Merchant'))),
+            DataColumn(label: Expanded(child: Text('Category'))),
+            DataColumn(label: Expanded(child: Text('Amount'))),
+            DataColumn(label: Expanded(child: Text('Balance'))),
           ],
           rows: [
             ...balanceTracker.map((entry) {
@@ -125,19 +122,25 @@ class _TransactionTableState extends State<TransactionTable> {
                   DataCell(Text(entry.$1.name)),
                   DataCell(Text(getLabel(entry.$1.type))),
                   DataCell(
-                    Text('\$${entry.$1.amount.abs().toStringAsFixed(2)}',
+                    Text(
+                      '\$${entry.$1.amount.abs().toStringAsFixed(2)}',
                       style: TextStyle(
-                        color: entry.$1.amount < 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error
+                        color: entry.$1.amount < 0
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.error,
                       ),
-                    )
+                    ),
                   ),
                   DataCell(
-                    Text('${entry.$2 >= 0 ? '' : '-'}\$${entry.$2.abs().toStringAsFixed(2)}',
+                    Text(
+                      '${entry.$2 >= 0 ? '' : '-'}\$${entry.$2.abs().toStringAsFixed(2)}',
                       style: TextStyle(
-                        color: entry.$2 > 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error
+                        color: entry.$2 > 0
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.error,
                       ),
-                    )
-                  )
+                    ),
+                  ),
                 ],
               );
             }),

@@ -83,7 +83,7 @@ class DatabaseService {
 
   Future<Account?> getAccountById(String id) async {
     final db = await database;
-    
+
     final List<Map<String, dynamic>> result = await db.query(
       Account.tableName,
       where: '${Account.columnId} = ?',
@@ -101,14 +101,18 @@ class DatabaseService {
   Future<List<Account>> getAccounts() async {
     final db = await database;
     final data = await db.query(Account.tableName);
-    List<Account> accounts = data.map((account) => Account.fromMap(account)).toList();
+    List<Account> accounts = data
+        .map((account) => Account.fromMap(account))
+        .toList();
     return accounts;
   }
 
   Future<List<TransactionEntry>> getTransactions() async {
     final db = await database;
     final data = await db.query(TransactionEntry.tableName);
-    List<TransactionEntry> transactions = data.map((transaction) => TransactionEntry.fromMap(transaction)).toList();
+    List<TransactionEntry> transactions = data
+        .map((transaction) => TransactionEntry.fromMap(transaction))
+        .toList();
     return transactions;
   }
 }

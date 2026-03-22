@@ -29,10 +29,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return user != null ? ProfileScreen(
-      actions: [
-        _signOut(),
-      ],
-    ) : SignInPage();
+    return user != null ? ProfileScreen(actions: [_signOut()]) : SignInPage();
   }
 }

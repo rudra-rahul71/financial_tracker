@@ -11,16 +11,18 @@ class SnackbarService {
         content: Row(
           children: [
             Icon(Icons.check),
-            Expanded(child: Text(
-            message,
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
-            textAlign: TextAlign.right,
-          ),),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                textAlign: TextAlign.right,
+              ),
+            ),
           ],
         ),
         backgroundColor: Theme.of(context).colorScheme.onPrimary,
         behavior: SnackBarBehavior.floating,
-      )
+      ),
     );
   }
 
@@ -29,20 +31,19 @@ class SnackbarService {
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              Icons.error,
-              color: Theme.of(context).colorScheme.error,
+            Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                textAlign: TextAlign.right,
+              ),
             ),
-            Expanded(child: Text(
-              message,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-              textAlign: TextAlign.right,
-            ),),
           ],
         ),
         backgroundColor: Theme.of(context).colorScheme.onError,
         behavior: SnackBarBehavior.floating,
-      )
+      ),
     );
   }
 }

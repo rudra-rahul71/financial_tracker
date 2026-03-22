@@ -11,7 +11,6 @@ class TransactionEntry {
   static const String columnSubtype = 'subtype';
   static const String columnAmount = 'amount';
 
-
   TransactionEntry({
     required this.id,
     required this.accountId,
@@ -19,7 +18,7 @@ class TransactionEntry {
     required this.date,
     required this.type,
     required this.subtype,
-    required this.amount
+    required this.amount,
   });
 
   factory TransactionEntry.fromJson(Map<String, dynamic> json) {
@@ -30,13 +29,13 @@ class TransactionEntry {
       date: json['date'],
       type: json['personal_finance_category']['primary'],
       subtype: json['personal_finance_category']['detailed'],
-      amount: (json['amount'] as num).toDouble()
+      amount: (json['amount'] as num).toDouble(),
     );
   }
 
   static List<TransactionEntry> fromJsonList(List<dynamic> jsonList) {
     final List<TransactionEntry> transactions = [];
-    for(final account in jsonList) {
+    for (final account in jsonList) {
       transactions.add(TransactionEntry.fromJson(account));
     }
     return transactions;
@@ -62,11 +61,19 @@ class TransactionEntry {
       date: map[columnDate] as String,
       type: map[columnType] as String,
       subtype: map[columnSubtype] as String,
-      amount: (map[columnAmount] as num).toDouble()
+      amount: (map[columnAmount] as num).toDouble(),
     );
   }
 
   TransactionEntry copy() {
-    return TransactionEntry(id: id, accountId: accountId, name: name, date: date, type: type, subtype: subtype, amount: amount);
+    return TransactionEntry(
+      id: id,
+      accountId: accountId,
+      name: name,
+      date: date,
+      type: type,
+      subtype: subtype,
+      amount: amount,
+    );
   }
 }

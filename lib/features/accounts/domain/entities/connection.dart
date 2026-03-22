@@ -3,7 +3,6 @@ import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
 import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
 
 class Connection {
-
   final List<Account> accounts;
   final List<TransactionEntry> transactions;
   final Item item;
@@ -24,7 +23,7 @@ class Connection {
 
   static List<Connection> fromJsonList(List<dynamic> jsonList) {
     final List<Connection> connections = [];
-    for(final connection in jsonList) {
+    for (final connection in jsonList) {
       connections.add(Connection.fromJson(connection));
     }
     return connections;

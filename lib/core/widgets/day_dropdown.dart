@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class DayDropdown extends StatefulWidget {
   final ValueChanged<int> daysUpdated;
 
-  const DayDropdown({
-    super.key,
-    required this.daysUpdated,
-  });
+  const DayDropdown({super.key, required this.daysUpdated});
 
   @override
   State<DayDropdown> createState() => _DayDropdownState();
@@ -26,8 +23,11 @@ class _DayDropdownState extends State<DayDropdown> {
           initialValue: _selectedDays,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Theme.of(context).colorScheme.onPrimary, 
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            fillColor: Theme.of(context).colorScheme.onPrimary,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 10,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),
               borderSide: BorderSide.none,
@@ -45,9 +45,7 @@ class _DayDropdownState extends State<DayDropdown> {
               value: value,
               child: Text(
                 'Last $value days',
-                style: const TextStyle(
-                  fontSize: 12,
-                ),
+                style: const TextStyle(fontSize: 12),
               ),
             );
           }).toList(),
