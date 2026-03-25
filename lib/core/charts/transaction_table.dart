@@ -103,49 +103,129 @@ class _TransactionTableState extends State<TransactionTable> {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, List<(TransactionEntry, double)>> groupedTransactions = {};
+    for (var entry in balanceTracker) {
+      String date = formatDate(entry.$1.date);
+      if (!groupedTransactions.containsKey(date)) {
+        groupedTransactions[date] = [];
+      }
+      groupedTransactions[date]!.add(entry);
+    }
+
     return SingleChildScrollView(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: const <DataColumn>[
-            DataColumn(label: Expanded(child: Text('Date'))),
-            DataColumn(label: Expanded(child: Text('Merchant'))),
-            DataColumn(label: Expanded(child: Text('Category'))),
-            DataColumn(label: Expanded(child: Text('Amount'))),
-            DataColumn(label: Expanded(child: Text('Balance'))),
-          ],
-          rows: [
-            ...balanceTracker.map((entry) {
-              return DataRow(
-                cells: <DataCell>[
-                  DataCell(Text(formatDate(entry.$1.date))),
-                  DataCell(Text(entry.$1.name)),
-                  DataCell(Text(getLabel(entry.$1.type))),
-                  DataCell(
-                    Text(
-                      '\$${entry.$1.amount.abs().toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: entry.$1.amount < 0
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      '${entry.$2 >= 0 ? '' : '-'}\$${entry.$2.abs().toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: entry.$2 > 0
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.error,
-                      ),
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: DefaultTextStyle(
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+              child: const Row(
+                children: [
+                  Expanded(flex: 2, child: Text('Merchant')),
+                  Expanded(flex: 2, child: Text('Category')),
+                  Expanded(
+                    flex: 1,
+                    child: Text('Amount', textAlign: TextAlign.right),
                   ),
                 ],
-              );
-            }),
-          ],
-        ),
+              ),
+            ),
+          ),
+          const Divider(height: 1),
+          ...groupedTransactions.entries.map((group) {
+            String date = group.key;
+            var entries = group.value;
+            double eodBalance = entries.first.$2;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        date,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Final Balance: ${eodBalance >= 0 ? '' : '-'}\$${eodBalance.abs().toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: eodBalance > 0
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ...entries.map((entry) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            entry.$1.name,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            getLabel(entry.$1.type),
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            '\$${entry.$1.amount.abs().toStringAsFixed(2)}',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: entry.$1.amount < 0
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }
