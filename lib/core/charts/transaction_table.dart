@@ -1,14 +1,18 @@
 import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
+import 'package:financial_tracker/core/database/db_service.dart';
+import 'package:financial_tracker/core/utils/formatters.dart';
 import 'package:flutter/material.dart';
 
 class TransactionTable extends StatefulWidget {
   final double total;
   final List<TransactionEntry> transactions;
+  final VoidCallback onCategoryChanged;
 
   const TransactionTable({
     super.key,
     required this.total,
     required this.transactions,
+    required this.onCategoryChanged,
   });
 
   @override
@@ -17,30 +21,6 @@ class TransactionTable extends StatefulWidget {
 
 class _TransactionTableState extends State<TransactionTable> {
   List<(TransactionEntry, double)> balanceTracker = [];
-
-  getLabel(String value) {
-    return switch (value) {
-      "GENERAL_MERCHANDISE" => "Shopping",
-      "FOOD_AND_DRINK" => "Food",
-      "ENTERTAINMENT" => "Leisure",
-      "PERSONAL_CARE" => "Personal",
-      "LOAN_PAYMENTS" => "Loans",
-      "TRANSPORTATION" => "Travel",
-      _ => formatSnakeCaseToTitle(value),
-    };
-  }
-
-  String formatSnakeCaseToTitle(String input) {
-    if (input.isEmpty) return "";
-
-    return input
-        .split('_')
-        .map((word) {
-          if (word.isEmpty) return "";
-          return word[0].toUpperCase() + word.substring(1).toLowerCase();
-        })
-        .join(' ');
-  }
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
@@ -101,6 +81,97 @@ class _TransactionTableState extends State<TransactionTable> {
     }
   }
 
+  void _editCategory(TransactionEntry transaction) async {
+    final Set<String> baseCategories = {
+      'INCOME', 'TRANSFER_IN', 'TRANSFER_OUT', 'LOAN_PAYMENTS', 'BANK_FEES',
+      'ENTERTAINMENT', 'FOOD_AND_DRINK', 'GENERAL_MERCHANDISE', 'HOME_IMPROVEMENT',
+      'MEDICAL', 'PERSONAL_CARE', 'GENERAL_SERVICES', 'GOVERNMENT_AND_NON_PROFIT',
+      'TRANSPORTATION', 'TRAVEL', 'RENT_AND_UTILITIES'
+    };
+    baseCategories.addAll(widget.transactions.map((t) => t.type));
+    
+    final categories = baseCategories.toList();
+    categories.sort();
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        String newCategory = '';
+        bool isCustom = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Change Category'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!isCustom)
+                      Flexible(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            ...categories.map((c) => ListTile(
+                              title: Text(getCategoryLabel(c)),
+                              onTap: () => Navigator.pop(context, c),
+                            )),
+                            ListTile(
+                              leading: const Icon(Icons.add),
+                              title: const Text('Add Custom Category...'),
+                              onTap: () {
+                                setState(() {
+                                  isCustom = true;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      TextField(
+                        autofocus: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Custom Category',
+                          hintText: 'e.g. Small Business',
+                        ),
+                        onChanged: (val) => newCategory = val,
+                        onSubmitted: (val) {
+                          if (val.isNotEmpty) {
+                            Navigator.pop(context, val.toUpperCase().replaceAll(' ', '_'));
+                          }
+                        },
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                if (isCustom)
+                  TextButton(
+                    onPressed: () {
+                      if (newCategory.isNotEmpty) {
+                        Navigator.pop(context, newCategory.toUpperCase().replaceAll(' ', '_'));
+                      }
+                    },
+                    child: const Text('Save'),
+                  ),
+              ],
+            );
+          }
+        );
+      },
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await DatabaseService.instance.saveTransactionPreference(transaction.id, category: result);
+      widget.onCategoryChanged();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Map<String, List<(TransactionEntry, double)>> groupedTransactions = {};
@@ -130,6 +201,7 @@ class _TransactionTableState extends State<TransactionTable> {
                     flex: 1,
                     child: Text('Amount', textAlign: TextAlign.right),
                   ),
+                  SizedBox(width: 40),
                 ],
               ),
             ),
@@ -205,7 +277,7 @@ class _TransactionTableState extends State<TransactionTable> {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            getLabel(entry.$1.type),
+                            getCategoryLabel(entry.$1.type),
                             style: const TextStyle(fontSize: 13),
                           ),
                         ),
@@ -220,6 +292,33 @@ class _TransactionTableState extends State<TransactionTable> {
                                   ? Theme.of(context).colorScheme.primary
                                   : Theme.of(context).colorScheme.error,
                             ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 40,
+                          child: PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert, size: 18),
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                _editCategory(entry.$1);
+                              } else if (value == 'hide') {
+                                await DatabaseService.instance.saveTransactionPreference(entry.$1.id, isHidden: true);
+                                widget.onCategoryChanged();
+                              } else if (value == 'unhide') {
+                                await DatabaseService.instance.saveTransactionPreference(entry.$1.id, isHidden: false);
+                                widget.onCategoryChanged();
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Text('Edit Category'),
+                              ),
+                              PopupMenuItem(
+                                value: entry.$1.isHidden ? 'unhide' : 'hide',
+                                child: Text(entry.$1.isHidden ? 'Unhide from Analytics' : 'Hide from Analytics'),
+                              ),
+                            ],
                           ),
                         ),
                       ],

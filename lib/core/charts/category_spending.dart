@@ -1,34 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:financial_tracker/core/utils/formatters.dart';
 import 'package:flutter/material.dart';
 
 class CategorySpending extends StatelessWidget {
   final List<MapEntry<String, double>> groupedTransactions;
 
   const CategorySpending({super.key, required this.groupedTransactions});
-
-  getLabel(String value) {
-    return switch (value) {
-      "GENERAL_MERCHANDISE" => "Shopping",
-      "FOOD_AND_DRINK" => "Food",
-      "ENTERTAINMENT" => "Leisure",
-      "PERSONAL_CARE" => "Personal",
-      "LOAN_PAYMENTS" => "Loans",
-      "TRANSPORTATION" => "Travel",
-      _ => formatSnakeCaseToTitle(value),
-    };
-  }
-
-  String formatSnakeCaseToTitle(String input) {
-    if (input.isEmpty) return "";
-
-    return input
-        .split('_')
-        .map((word) {
-          if (word.isEmpty) return "";
-          return word[0].toUpperCase() + word.substring(1).toLowerCase();
-        })
-        .join(' ');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +39,7 @@ class CategorySpending extends StatelessWidget {
                       showTitles: true,
                       reservedSize: 110,
                       getTitlesWidget: (value, meta) {
-                        final label = getLabel(groupedTransactions[value.toInt()].key);
+                        final label = getCategoryLabel(groupedTransactions[value.toInt()].key);
                         return SideTitleWidget(
                           meta: meta,
                           child: Tooltip(

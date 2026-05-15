@@ -38,9 +38,29 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   Future<void> _updateTransactions() async {
     final Map<String, double> groupedTransactions = {};
 
-    List<TransactionEntry> transactions = await _databaseService
+    List<TransactionEntry> allTransactions = await _databaseService
         .getTransactions();
+
+    DateTime now = DateTime.now();
+    DateTime threshold = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: ApiService.interval));
+
+    List<TransactionEntry> transactions = allTransactions.where((t) {
+      if (t.date.isEmpty) return false;
+      try {
+        DateTime transactionDate = DateTime.parse(t.date);
+        return !transactionDate.isBefore(threshold);
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+        
     for (final transaction in transactions) {
+      if (transaction.isHidden) continue;
+
       if (transaction.amount > 0) {
         groupedTransactions.putIfAbsent(transaction.type, () => 0.0);
 

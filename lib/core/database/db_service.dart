@@ -57,6 +57,13 @@ class DatabaseService {
             ${SyncCursor.columnNextCursor} TEXT NOT NULL
           )
         ''');
+        await db.execute('''
+          CREATE TABLE transaction_preferences (
+            transaction_id TEXT PRIMARY KEY,
+            custom_category TEXT,
+            is_hidden INTEGER NOT NULL DEFAULT 0
+          )
+        ''');
       },
     );
     return database;
@@ -79,6 +86,21 @@ class DatabaseService {
       where: '${TransactionEntry.columnId} = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<void> saveTransactionPreference(String id, {String? category, bool? isHidden}) async {
+    final db = await database;
+    final existing = await db.query('transaction_preferences', where: 'transaction_id = ?', whereArgs: [id]);
+    
+    Map<String, dynamic> data = {'transaction_id': id};
+    if (existing.isNotEmpty) {
+      data = Map<String, dynamic>.from(existing.first);
+    }
+    
+    if (category != null) data['custom_category'] = category;
+    if (isHidden != null) data['is_hidden'] = isHidden ? 1 : 0;
+    
+    await db.insert('transaction_preferences', data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<DateTime?> getLatestTransactionDate() async {
@@ -142,6 +164,26 @@ class DatabaseService {
     List<TransactionEntry> transactions = data
         .map((transaction) => TransactionEntry.fromMap(transaction))
         .toList();
+
+    try {
+      final prefsData = await db.query('transaction_preferences');
+      final Map<String, Map<String, dynamic>> prefsMap = {
+        for (var row in prefsData)
+          row['transaction_id'] as String: row
+      };
+      for (var t in transactions) {
+        if (prefsMap.containsKey(t.id)) {
+          final pref = prefsMap[t.id]!;
+          if (pref['custom_category'] != null) {
+            t.type = pref['custom_category'] as String;
+          }
+          t.isHidden = (pref['is_hidden'] as int? ?? 0) == 1;
+        }
+      }
+    } catch (e) {
+      // Ignore if table doesn't exist
+    }
+
     return transactions;
   }
 

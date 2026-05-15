@@ -18,7 +18,7 @@ class _SpendingTrackerState extends State<SpendingTracker> {
   void _updateTransactions() {
     setState(() {
       _transactions = widget.transactions
-          .where((transaction) => transaction.amount > 0)
+          .where((transaction) => transaction.amount > 0 && !transaction.isHidden)
           .toList();
 
       Map<String, TransactionEntry> t = _transactions.fold(

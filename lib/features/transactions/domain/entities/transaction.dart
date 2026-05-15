@@ -3,6 +3,7 @@ class TransactionEntry {
   double amount;
 
   bool isPending;
+  bool isHidden = false;
 
   static const String tableName = 'transactions';
   static const String columnId = 'id';

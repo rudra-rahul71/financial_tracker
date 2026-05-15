@@ -42,6 +42,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     for (final entry in _selectedTransactions) {
       for (final transaction in entry.value.$3) {
+        if (transaction.isHidden) continue;
+
         if (transaction.amount > 0) {
           totalSpent += transaction.amount;
           totalTransactions++;
@@ -318,6 +320,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                   previousSum +
                                   (entry.value.$2.available ?? 0).toDouble(),
                             ),
+                            onCategoryChanged: () {
+                              _updateTransactions();
+                            },
                           ),
                         ),
                       ],

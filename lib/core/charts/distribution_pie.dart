@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:financial_tracker/core/utils/formatters.dart';
 import 'package:flutter/material.dart';
 
 class DistributionPieChart extends StatefulWidget {
@@ -12,30 +13,6 @@ class DistributionPieChart extends StatefulWidget {
 
 class _DistributionPieChartState extends State<DistributionPieChart> {
   int? _selected;
-
-  getLabel(String value) {
-    return switch (value) {
-      "GENERAL_MERCHANDISE" => "Shopping",
-      "FOOD_AND_DRINK" => "Food",
-      "ENTERTAINMENT" => "Leisure",
-      "PERSONAL_CARE" => "Personal",
-      "LOAN_PAYMENTS" => "Loans",
-      "TRANSPORTATION" => "Travel",
-      _ => formatSnakeCaseToTitle(value),
-    };
-  }
-
-  String formatSnakeCaseToTitle(String input) {
-    if (input.isEmpty) return "";
-
-    return input
-        .split('_')
-        .map((word) {
-          if (word.isEmpty) return "";
-          return word[0].toUpperCase() + word.substring(1).toLowerCase();
-        })
-        .join(' ');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +61,7 @@ class _DistributionPieChartState extends State<DistributionPieChart> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Category: ${getLabel(widget.groupedTransactions[_selected!].key)}',
+                  'Category: ${getCategoryLabel(widget.groupedTransactions[_selected!].key)}',
                 ),
                 Text(
                   'Spent: \$${widget.groupedTransactions[_selected!].value.toStringAsFixed(2)}',
