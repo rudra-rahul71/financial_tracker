@@ -60,12 +60,19 @@ class CategorySpending extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 75,
+                      reservedSize: 110,
                       getTitlesWidget: (value, meta) {
+                        final label = getLabel(groupedTransactions[value.toInt()].key);
                         return SideTitleWidget(
                           meta: meta,
-                          child: Text(
-                            getLabel(groupedTransactions[value.toInt()].key),
+                          child: Tooltip(
+                            message: label,
+                            child: Text(
+                              label,
+                              style: const TextStyle(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         );
                       },
