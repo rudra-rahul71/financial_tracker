@@ -60,6 +60,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
             type: '',
             subtype: '',
             amount: balanceTracker,
+            isPending: false,
           ),
         );
 

@@ -191,13 +191,17 @@ class _TransactionTableState extends State<TransactionTable> {
                     ),
                     child: Row(
                       children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            entry.$1.name,
-                            style: const TextStyle(fontSize: 13),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              entry.$1.name + (entry.$1.isPending ? ' (Pending)' : ''),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontStyle: entry.$1.isPending ? FontStyle.italic : null,
+                                color: entry.$1.isPending ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6) : null,
+                              ),
+                            ),
                           ),
-                        ),
                         Expanded(
                           flex: 2,
                           child: Text(

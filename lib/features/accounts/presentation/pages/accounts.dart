@@ -9,6 +9,7 @@ import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:financial_tracker/core/utils/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
+import 'dart:io' show Platform;
 
 class AccountsPage extends StatefulWidget {
   const AccountsPage({super.key});
@@ -26,6 +27,13 @@ class _AccountsPageState extends State<AccountsPage> {
   bool _loading = false;
 
   Future<void> _initPlaidIntegration(BuildContext context) async {
+    if (Platform.isMacOS) {
+      SnackbarService(
+        context,
+      ).showErrorSnackbar(message: "Adding accounts aren't supported on macOS, try iPhone/Android");
+      return;
+    }
+
     setState(() {
       _loading = true;
     });

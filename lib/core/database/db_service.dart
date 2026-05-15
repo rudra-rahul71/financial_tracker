@@ -1,6 +1,7 @@
 import 'package:financial_tracker/features/accounts/domain/entities/account.dart';
 import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
 import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
+import 'package:financial_tracker/features/accounts/domain/entities/sync_cursor.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseService {
@@ -46,7 +47,14 @@ class DatabaseService {
             ${TransactionEntry.columnDate} TEXT NOT NULL,
             ${TransactionEntry.columnAmount} REAL NOT NULL,
             ${TransactionEntry.columnType} TEXT NOT NULL,
-            ${TransactionEntry.columnSubtype} TEXT NOT NULL
+            ${TransactionEntry.columnSubtype} TEXT NOT NULL,
+            ${TransactionEntry.columnIsPending} INTEGER NOT NULL
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE ${SyncCursor.tableName} (
+            ${SyncCursor.columnItemId} TEXT PRIMARY KEY,
+            ${SyncCursor.columnNextCursor} TEXT NOT NULL
           )
         ''');
       },
@@ -59,9 +67,30 @@ class DatabaseService {
     db.delete(table);
   }
 
-  void updateTable(String table, dynamic value) async {
+  void updateTable(String table, dynamic value, {ConflictAlgorithm? conflictAlgorithm}) async {
     final db = await database;
-    db.insert(table, value.toMap());
+    db.insert(table, value.toMap(), conflictAlgorithm: conflictAlgorithm);
+  }
+
+  void removeTransaction(String id) async {
+    final db = await database;
+    db.delete(
+      TransactionEntry.tableName,
+      where: '${TransactionEntry.columnId} = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<DateTime?> getLatestTransactionDate() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT MAX(${TransactionEntry.columnDate}) as max_date FROM ${TransactionEntry.tableName}'
+    );
+    if (result.isNotEmpty && result.first['max_date'] != null) {
+      final dateString = result.first['max_date'] as String;
+      return DateTime.tryParse(dateString);
+    }
+    return null;
   }
 
   Future<Item?> getItemById(String id) async {
@@ -114,5 +143,41 @@ class DatabaseService {
         .map((transaction) => TransactionEntry.fromMap(transaction))
         .toList();
     return transactions;
+  }
+
+  Future<String?> getCursor(String itemId) async {
+    final db = await database;
+    final result = await db.query(
+      SyncCursor.tableName,
+      where: '${SyncCursor.columnItemId} = ?',
+      whereArgs: [itemId],
+      limit: 1,
+    );
+    if (result.isNotEmpty) {
+      return result.first[SyncCursor.columnNextCursor] as String?;
+    }
+    return null;
+  }
+
+  Future<void> saveCursor(String itemId, String nextCursor) async {
+    final db = await database;
+    await db.insert(
+      SyncCursor.tableName,
+      {
+        SyncCursor.columnItemId: itemId,
+        SyncCursor.columnNextCursor: nextCursor,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, String>> getAllCursors() async {
+    final db = await database;
+    final data = await db.query(SyncCursor.tableName);
+    return {
+      for (var row in data)
+        row[SyncCursor.columnItemId] as String:
+            row[SyncCursor.columnNextCursor] as String,
+    };
   }
 }

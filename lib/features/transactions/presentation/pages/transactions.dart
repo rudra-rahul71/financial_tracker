@@ -51,7 +51,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
       }
     }
 
-    avgTransactions = totalSpent / totalTransactions;
+    avgTransactions = totalTransactions > 0
+        ? totalSpent / totalTransactions
+        : 0;
   }
 
   Future<void> _updateDays(int days) async {
@@ -79,10 +81,29 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Future<void> _updateTransactions() async {
     final Map<String, (Item, Account, List<TransactionEntry>)>
     groupedTransactions = {};
-    transactions = await _databaseService.getTransactions();
+
+    DateTime now = DateTime.now();
+    DateTime threshold = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: ApiService.interval));
+
+    List<TransactionEntry> allTransactions = await _databaseService
+        .getTransactions();
+
+    transactions = allTransactions.where((t) {
+      if (t.date.isEmpty) return false;
+      try {
+        DateTime transactionDate = DateTime.parse(t.date);
+        return !transactionDate.isBefore(threshold);
+      } catch (e) {
+        return false;
+      }
+    }).toList();
 
     for (final transaction in transactions) {
-      if (transaction.accountId.isEmpty || transaction.date.isEmpty) {
+      if (transaction.accountId.isEmpty) {
         continue;
       }
 

@@ -2,6 +2,8 @@ class TransactionEntry {
   String id, accountId, name, date, type, subtype;
   double amount;
 
+  bool isPending;
+
   static const String tableName = 'transactions';
   static const String columnId = 'id';
   static const String columnAccountId = 'account_id';
@@ -10,6 +12,7 @@ class TransactionEntry {
   static const String columnType = 'type';
   static const String columnSubtype = 'subtype';
   static const String columnAmount = 'amount';
+  static const String columnIsPending = 'is_pending';
 
   TransactionEntry({
     required this.id,
@@ -19,6 +22,7 @@ class TransactionEntry {
     required this.type,
     required this.subtype,
     required this.amount,
+    required this.isPending,
   });
 
   factory TransactionEntry.fromJson(Map<String, dynamic> json) {
@@ -27,16 +31,17 @@ class TransactionEntry {
       accountId: json['account_id'],
       name: json['name'],
       date: json['date'],
-      type: json['personal_finance_category']['primary'],
-      subtype: json['personal_finance_category']['detailed'],
+      type: json['personal_finance_category']?['primary'] ?? '',
+      subtype: json['personal_finance_category']?['detailed'] ?? '',
       amount: (json['amount'] as num).toDouble(),
+      isPending: json['pending'] == true,
     );
   }
 
   static List<TransactionEntry> fromJsonList(List<dynamic> jsonList) {
     final List<TransactionEntry> transactions = [];
-    for (final account in jsonList) {
-      transactions.add(TransactionEntry.fromJson(account));
+    for (final json in jsonList) {
+      transactions.add(TransactionEntry.fromJson(json));
     }
     return transactions;
   }
@@ -50,6 +55,7 @@ class TransactionEntry {
       columnType: type,
       columnSubtype: subtype,
       columnAmount: amount,
+      columnIsPending: isPending ? 1 : 0,
     };
   }
 
@@ -62,6 +68,7 @@ class TransactionEntry {
       type: map[columnType] as String,
       subtype: map[columnSubtype] as String,
       amount: (map[columnAmount] as num).toDouble(),
+      isPending: (map[columnIsPending] as int) == 1,
     );
   }
 
@@ -74,6 +81,7 @@ class TransactionEntry {
       type: type,
       subtype: subtype,
       amount: amount,
+      isPending: isPending,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:financial_tracker/features/accounts/domain/entities/account.dart';
 import 'package:financial_tracker/features/accounts/domain/entities/connection.dart';
@@ -11,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:plaid_flutter/plaid_flutter.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ApiService {
   // The host URL can be injected at build time, e.g.
@@ -36,14 +38,20 @@ class ApiService {
     if (user == null) return;
     final idToken = await user.getIdToken();
 
+    final cursors = await _databaseService.getAllCursors();
+
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $idToken',
     };
 
-    final url = Uri.parse('$host/search/$_interval');
+    final url = Uri.parse('$host/sync');
 
-    final response = await http.get(url, headers: headers);
+    final body = json.encode({
+      'cursors': cursors,
+    });
+
+    final response = await http.post(url, headers: headers, body: body);
     if (response.statusCode != 200) {
       if (context.mounted) {
         SnackbarService(context).showErrorSnackbar(
@@ -53,16 +61,23 @@ class ApiService {
     } else {
       final data = json.decode(response.body);
       final connections = Connection.fromJsonList(data);
-      _databaseService.clearTable(Item.tableName);
-      _databaseService.clearTable(Account.tableName);
-      _databaseService.clearTable(TransactionEntry.tableName);
+      
       for (final connection in connections) {
-        _databaseService.updateTable(Item.tableName, connection.item);
-        for (final account in connection.accounts) {
-          _databaseService.updateTable(Account.tableName, account);
+        _databaseService.updateTable(Item.tableName, connection.item, conflictAlgorithm: ConflictAlgorithm.replace);
+        if (connection.nextCursor.isNotEmpty) {
+          _databaseService.saveCursor(connection.item.id, connection.nextCursor);
         }
-        for (final transaction in connection.transactions) {
-          _databaseService.updateTable(TransactionEntry.tableName, transaction);
+        for (final account in connection.accounts) {
+          _databaseService.updateTable(Account.tableName, account, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+        for (final transaction in connection.added) {
+          _databaseService.updateTable(TransactionEntry.tableName, transaction, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+        for (final transaction in connection.modified) {
+          _databaseService.updateTable(TransactionEntry.tableName, transaction, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+        for (final id in connection.removed) {
+          _databaseService.removeTransaction(id);
         }
       }
 
@@ -110,6 +125,14 @@ class ApiService {
 
   Future<dynamic> initPlaidIntegration(BuildContext context) async {
     try {
+      if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+        if (context.mounted) {
+          SnackbarService(context).showErrorSnackbar(
+            message: 'You can only add accounts on iPhone or Android.',
+          );
+        }
+        return null;
+      }
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("User not logged in");
       final idToken = await user.getIdToken();
@@ -144,6 +167,7 @@ class ApiService {
         }
       }
     } catch (e) {
+      print('Exception in initPlaidIntegration: $e');
       if (context.mounted) {
         SnackbarService(
           context,
