@@ -28,9 +28,10 @@ class _AccountsPageState extends State<AccountsPage> {
 
   Future<void> _initPlaidIntegration(BuildContext context) async {
     if (Platform.isMacOS) {
-      SnackbarService(
-        context,
-      ).showErrorSnackbar(message: "Adding accounts aren't supported on macOS, try iPhone/Android");
+      SnackbarService(context).showErrorSnackbar(
+        message:
+            "Adding accounts aren't supported on macOS, try iPhone/Android",
+      );
       return;
     }
 

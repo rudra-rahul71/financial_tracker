@@ -47,9 +47,7 @@ class ApiService {
 
     final url = Uri.parse('$host/sync');
 
-    final body = json.encode({
-      'cursors': cursors,
-    });
+    final body = json.encode({'cursors': cursors});
 
     final response = await http.post(url, headers: headers, body: body);
     if (response.statusCode != 200) {
@@ -61,20 +59,39 @@ class ApiService {
     } else {
       final data = json.decode(response.body);
       final connections = Connection.fromJsonList(data);
-      
+
       for (final connection in connections) {
-        _databaseService.updateTable(Item.tableName, connection.item, conflictAlgorithm: ConflictAlgorithm.replace);
+        _databaseService.updateTable(
+          Item.tableName,
+          connection.item,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
         if (connection.nextCursor.isNotEmpty) {
-          _databaseService.saveCursor(connection.item.id, connection.nextCursor);
+          _databaseService.saveCursor(
+            connection.item.id,
+            connection.nextCursor,
+          );
         }
         for (final account in connection.accounts) {
-          _databaseService.updateTable(Account.tableName, account, conflictAlgorithm: ConflictAlgorithm.replace);
+          _databaseService.updateTable(
+            Account.tableName,
+            account,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
         }
         for (final transaction in connection.added) {
-          _databaseService.updateTable(TransactionEntry.tableName, transaction, conflictAlgorithm: ConflictAlgorithm.replace);
+          _databaseService.updateTable(
+            TransactionEntry.tableName,
+            transaction,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
         }
         for (final transaction in connection.modified) {
-          _databaseService.updateTable(TransactionEntry.tableName, transaction, conflictAlgorithm: ConflictAlgorithm.replace);
+          _databaseService.updateTable(
+            TransactionEntry.tableName,
+            transaction,
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
         }
         for (final id in connection.removed) {
           _databaseService.removeTransaction(id);

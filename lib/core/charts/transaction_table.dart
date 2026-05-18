@@ -83,13 +83,25 @@ class _TransactionTableState extends State<TransactionTable> {
 
   void _editCategory(TransactionEntry transaction) async {
     final Set<String> baseCategories = {
-      'INCOME', 'TRANSFER_IN', 'TRANSFER_OUT', 'LOAN_PAYMENTS', 'BANK_FEES',
-      'ENTERTAINMENT', 'FOOD_AND_DRINK', 'GENERAL_MERCHANDISE', 'HOME_IMPROVEMENT',
-      'MEDICAL', 'PERSONAL_CARE', 'GENERAL_SERVICES', 'GOVERNMENT_AND_NON_PROFIT',
-      'TRANSPORTATION', 'TRAVEL', 'RENT_AND_UTILITIES'
+      'INCOME',
+      'TRANSFER_IN',
+      'TRANSFER_OUT',
+      'LOAN_PAYMENTS',
+      'BANK_FEES',
+      'ENTERTAINMENT',
+      'FOOD_AND_DRINK',
+      'GENERAL_MERCHANDISE',
+      'HOME_IMPROVEMENT',
+      'MEDICAL',
+      'PERSONAL_CARE',
+      'GENERAL_SERVICES',
+      'GOVERNMENT_AND_NON_PROFIT',
+      'TRANSPORTATION',
+      'TRAVEL',
+      'RENT_AND_UTILITIES',
     };
     baseCategories.addAll(widget.transactions.map((t) => t.type));
-    
+
     final categories = baseCategories.toList();
     categories.sort();
 
@@ -112,10 +124,12 @@ class _TransactionTableState extends State<TransactionTable> {
                         child: ListView(
                           shrinkWrap: true,
                           children: [
-                            ...categories.map((c) => ListTile(
-                              title: Text(getCategoryLabel(c)),
-                              onTap: () => Navigator.pop(context, c),
-                            )),
+                            ...categories.map(
+                              (c) => ListTile(
+                                title: Text(getCategoryLabel(c)),
+                                onTap: () => Navigator.pop(context, c),
+                              ),
+                            ),
                             ListTile(
                               leading: const Icon(Icons.add),
                               title: const Text('Add Custom Category...'),
@@ -138,7 +152,10 @@ class _TransactionTableState extends State<TransactionTable> {
                         onChanged: (val) => newCategory = val,
                         onSubmitted: (val) {
                           if (val.isNotEmpty) {
-                            Navigator.pop(context, val.toUpperCase().replaceAll(' ', '_'));
+                            Navigator.pop(
+                              context,
+                              val.toUpperCase().replaceAll(' ', '_'),
+                            );
                           }
                         },
                       ),
@@ -154,20 +171,26 @@ class _TransactionTableState extends State<TransactionTable> {
                   TextButton(
                     onPressed: () {
                       if (newCategory.isNotEmpty) {
-                        Navigator.pop(context, newCategory.toUpperCase().replaceAll(' ', '_'));
+                        Navigator.pop(
+                          context,
+                          newCategory.toUpperCase().replaceAll(' ', '_'),
+                        );
                       }
                     },
                     child: const Text('Save'),
                   ),
               ],
             );
-          }
+          },
         );
       },
     );
 
     if (result != null && result.isNotEmpty) {
-      await DatabaseService.instance.saveTransactionPreference(transaction.id, category: result);
+      await DatabaseService.instance.saveTransactionPreference(
+        transaction.id,
+        category: result,
+      );
       widget.onCategoryChanged();
     }
   }
@@ -263,17 +286,23 @@ class _TransactionTableState extends State<TransactionTable> {
                     ),
                     child: Row(
                       children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              entry.$1.name + (entry.$1.isPending ? ' (Pending)' : ''),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontStyle: entry.$1.isPending ? FontStyle.italic : null,
-                                color: entry.$1.isPending ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6) : null,
-                              ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            entry.$1.name +
+                                (entry.$1.isPending ? ' (Pending)' : ''),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontStyle: entry.$1.isPending
+                                  ? FontStyle.italic
+                                  : null,
+                              color: entry.$1.isPending
+                                  ? Theme.of(context).colorScheme.onSurface
+                                        .withValues(alpha: 0.6)
+                                  : null,
                             ),
                           ),
+                        ),
                         Expanded(
                           flex: 2,
                           child: Text(
@@ -302,10 +331,18 @@ class _TransactionTableState extends State<TransactionTable> {
                               if (value == 'edit') {
                                 _editCategory(entry.$1);
                               } else if (value == 'hide') {
-                                await DatabaseService.instance.saveTransactionPreference(entry.$1.id, isHidden: true);
+                                await DatabaseService.instance
+                                    .saveTransactionPreference(
+                                      entry.$1.id,
+                                      isHidden: true,
+                                    );
                                 widget.onCategoryChanged();
                               } else if (value == 'unhide') {
-                                await DatabaseService.instance.saveTransactionPreference(entry.$1.id, isHidden: false);
+                                await DatabaseService.instance
+                                    .saveTransactionPreference(
+                                      entry.$1.id,
+                                      isHidden: false,
+                                    );
                                 widget.onCategoryChanged();
                               }
                             },
@@ -316,7 +353,11 @@ class _TransactionTableState extends State<TransactionTable> {
                               ),
                               PopupMenuItem(
                                 value: entry.$1.isHidden ? 'unhide' : 'hide',
-                                child: Text(entry.$1.isHidden ? 'Unhide from Analytics' : 'Hide from Analytics'),
+                                child: Text(
+                                  entry.$1.isHidden
+                                      ? 'Unhide from Analytics'
+                                      : 'Hide from Analytics',
+                                ),
                               ),
                             ],
                           ),
