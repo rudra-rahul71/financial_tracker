@@ -10,6 +10,7 @@ import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
 import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
 import 'package:financial_tracker/core/network/api_service.dart';
 import 'package:financial_tracker/core/database/db_service.dart';
+import 'package:financial_tracker/core/utils/formatters.dart';
 import 'package:flutter/material.dart';
 
 class TransactionsPage extends StatefulWidget {
@@ -28,6 +29,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   _selectedTransactions = [];
   List<TransactionEntry> transactions = [];
   String category = 'Balance';
+  String tableCategory = 'All Categories';
   bool _loading = false;
   double totalSpent = 0;
   double totalIncome = 0;
@@ -158,6 +160,57 @@ class _TransactionsPageState extends State<TransactionsPage> {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value, style: const TextStyle(fontSize: 12)),
+            );
+          }).toList(),
+          dropdownColor: Theme.of(context).colorScheme.onPrimary,
+        ),
+      ),
+    );
+  }
+
+  Widget tableCategoryDropdown() {
+    List<String> categoryList = _selectedTransactions
+        .expand((entry) => entry.value.$3)
+        .map((t) => t.type)
+        .toSet()
+        .toList()
+      ..sort();
+    categoryList.insert(0, 'All Categories');
+
+    if (!categoryList.contains(tableCategory)) {
+      tableCategory = 'All Categories';
+    }
+
+    return IntrinsicWidth(
+      child: SizedBox(
+        height: 40,
+        child: DropdownButtonFormField<String>(
+          initialValue: tableCategory,
+          icon: const Icon(Icons.filter_list, size: 20),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.onPrimary,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 10,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onChanged: (String? newValue) {
+            setState(() {
+              tableCategory = newValue!;
+            });
+          },
+          items: categoryList.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value == 'All Categories' ? value : getCategoryLabel(value),
+                style: const TextStyle(fontSize: 12),
+              ),
             );
           }).toList(),
           dropdownColor: Theme.of(context).colorScheme.onPrimary,
@@ -303,7 +356,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               ),
                         BasicCard(
                           title: 'All Transactions',
+                          action: tableCategoryDropdown(),
                           body: TransactionTable(
+                            selectedCategory: tableCategory,
                             transactions: _selectedTransactions
                                 .expand((entry) => entry.value.$3)
                                 .toList(),

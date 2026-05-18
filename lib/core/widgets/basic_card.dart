@@ -28,6 +28,7 @@ class _BasicCardState extends State<BasicCard> {
           children: [
             Wrap(
               alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               runSpacing: 20.0,
               spacing: 20.0,
               children: [Text(widget.title), ?widget.action],

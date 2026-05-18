@@ -7,12 +7,14 @@ class TransactionTable extends StatefulWidget {
   final double total;
   final List<TransactionEntry> transactions;
   final VoidCallback onCategoryChanged;
+  final String selectedCategory;
 
   const TransactionTable({
     super.key,
     required this.total,
     required this.transactions,
     required this.onCategoryChanged,
+    required this.selectedCategory,
   });
 
   @override
@@ -199,6 +201,9 @@ class _TransactionTableState extends State<TransactionTable> {
   Widget build(BuildContext context) {
     Map<String, List<(TransactionEntry, double)>> groupedTransactions = {};
     for (var entry in balanceTracker) {
+      if (widget.selectedCategory != 'All Categories' && entry.$1.type != widget.selectedCategory) {
+        continue;
+      }
       String date = formatDate(entry.$1.date);
       if (!groupedTransactions.containsKey(date)) {
         groupedTransactions[date] = [];
