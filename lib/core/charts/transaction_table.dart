@@ -210,26 +210,6 @@ class _TransactionTableState extends State<TransactionTable> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: DefaultTextStyle(
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
-              child: const Row(
-                children: [
-                  Expanded(flex: 2, child: Text('Merchant')),
-                  Expanded(flex: 2, child: Text('Category')),
-                  Expanded(
-                    flex: 1,
-                    child: Text('Amount', textAlign: TextAlign.right),
-                  ),
-                  SizedBox(width: 40),
-                ],
-              ),
-            ),
-          ),
-          const Divider(height: 1),
           ...groupedTransactions.entries.map((group) {
             String date = group.key;
             var entries = group.value;
@@ -249,21 +229,27 @@ class _TransactionTableState extends State<TransactionTable> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        date,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      Flexible(
+                        child: Text(
+                          date,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                      Text(
-                        'Final Balance: ${eodBalance >= 0 ? '' : '-'}\$${eodBalance.abs().toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: eodBalance > 0
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.error,
+                      const SizedBox(width: 16),
+                      Flexible(
+                        child: Text(
+                          'Final Balance: ${eodBalance >= 0 ? '' : '-'}\$${eodBalance.abs().toStringAsFixed(2)}',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: eodBalance > 0
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.error,
+                          ),
                         ),
                       ),
                     ],
@@ -287,40 +273,47 @@ class _TransactionTableState extends State<TransactionTable> {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 2,
-                          child: Text(
-                            entry.$1.name +
-                                (entry.$1.isPending ? ' (Pending)' : ''),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontStyle: entry.$1.isPending
-                                  ? FontStyle.italic
-                                  : null,
-                              color: entry.$1.isPending
-                                  ? Theme.of(context).colorScheme.onSurface
-                                        .withValues(alpha: 0.6)
-                                  : null,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                entry.$1.name +
+                                    (entry.$1.isPending ? ' (Pending)' : ''),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  fontStyle: entry.$1.isPending
+                                      ? FontStyle.italic
+                                      : null,
+                                  color: entry.$1.isPending
+                                      ? Theme.of(context).colorScheme.onSurface
+                                            .withValues(alpha: 0.6)
+                                      : null,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                getCategoryLabel(entry.$1.type),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            getCategoryLabel(entry.$1.type),
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            '\$${entry.$1.amount.abs().toStringAsFixed(2)}',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: entry.$1.amount < 0
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.error,
-                            ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '\$${entry.$1.amount.abs().toStringAsFixed(2)}',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: entry.$1.amount < 0
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.error,
                           ),
                         ),
                         SizedBox(

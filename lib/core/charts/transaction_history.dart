@@ -129,10 +129,10 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                 ),
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 30,
+                  reservedSize: 40,
                   interval:
                       86400000000.0 *
-                      math.max(1, (ApiService.interval / 5).ceil()),
+                      math.max(1, (ApiService.interval / 4).ceil()),
                   getTitlesWidget: (value, meta) {
                     final int micros = value.toInt();
                     final DateTime date = DateTime.fromMicrosecondsSinceEpoch(
@@ -142,9 +142,13 @@ class _TransactionHistoryState extends State<TransactionHistory> {
 
                     return SideTitleWidget(
                       meta: meta,
-                      child: Text(
-                        formattedDate,
-                        style: const TextStyle(fontSize: 10),
+                      space: 8.0,
+                      child: Transform.rotate(
+                        angle: -math.pi / 4,
+                        child: Text(
+                          formattedDate,
+                          style: const TextStyle(fontSize: 10),
+                        ),
                       ),
                     );
                   },

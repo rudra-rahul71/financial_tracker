@@ -29,10 +29,12 @@ class _DistributionPieChartState extends State<DistributionPieChart> {
           PieChartData(
             // centerSpaceRadius: 0,
             sections: List.generate(widget.groupedTransactions.length, (index) {
+              double percentage =
+                  (widget.groupedTransactions[index].value / totalValue) * 100;
               return PieChartSectionData(
                 value: widget.groupedTransactions[index].value,
-                title:
-                    '${((widget.groupedTransactions[index].value / totalValue) * 100).toStringAsFixed(2)}%',
+                title: '${percentage.toStringAsFixed(2)}%',
+                showTitle: percentage >= 5.0,
                 radius: _selected == index ? 90 : 100,
                 color: Theme.of(context).colorScheme.onPrimary,
                 borderSide: BorderSide(

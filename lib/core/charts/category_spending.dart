@@ -39,7 +39,9 @@ class CategorySpending extends StatelessWidget {
                       showTitles: true,
                       reservedSize: 110,
                       getTitlesWidget: (value, meta) {
-                        final label = getCategoryLabel(groupedTransactions[value.toInt()].key);
+                        final label = getCategoryLabel(
+                          groupedTransactions[value.toInt()].key,
+                        );
                         return SideTitleWidget(
                           meta: meta,
                           child: Tooltip(
@@ -61,9 +63,21 @@ class CategorySpending extends StatelessWidget {
                       reservedSize: 30,
                       interval: dynamicInterval,
                       getTitlesWidget: (value, meta) {
+                        String formatted;
+                        if (value >= 1000000) {
+                          formatted =
+                              '${(value / 1000000).toStringAsFixed(1)}M';
+                        } else if (value >= 1000) {
+                          formatted = '${(value / 1000).toStringAsFixed(1)}k';
+                        } else {
+                          formatted = value.toStringAsFixed(0);
+                        }
                         return SideTitleWidget(
                           meta: meta,
-                          child: Text('\$${value.toStringAsFixed(0)}'),
+                          child: Text(
+                            '\$$formatted',
+                            style: const TextStyle(fontSize: 10),
+                          ),
                         );
                       },
                     ),
