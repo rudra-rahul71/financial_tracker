@@ -140,7 +140,10 @@ class ApiService {
     }
   }
 
-  Future<dynamic> initPlaidIntegration(BuildContext context) async {
+  Future<dynamic> initPlaidIntegration(
+    BuildContext context,
+    String accountType,
+  ) async {
     try {
       if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
         if (context.mounted) {
@@ -159,7 +162,7 @@ class ApiService {
         'Authorization': 'Bearer $idToken',
       };
 
-      final url = Uri.parse('$host/init');
+      final url = Uri.parse('$host/init?type=$accountType');
 
       final resopnse = await http.get(url, headers: headers);
       if (resopnse.statusCode == 200) {

@@ -26,7 +26,43 @@ class _AccountsPageState extends State<AccountsPage> {
   int _totalAccounts = 0;
   bool _loading = false;
 
-  Future<void> _initPlaidIntegration(BuildContext context) async {
+  void _showAddAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Add Account'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.account_balance),
+                title: const Text('Bank Account'),
+                subtitle: const Text('Checking or Savings'),
+                onTap: () {
+                  Navigator.pop(dialogContext);
+                  _initPlaidIntegration(context, 'depository');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.credit_card),
+                title: const Text('Credit Card'),
+                onTap: () {
+                  Navigator.pop(dialogContext);
+                  _initPlaidIntegration(context, 'credit');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _initPlaidIntegration(
+    BuildContext context,
+    String accountType,
+  ) async {
     if (Platform.isMacOS) {
       SnackbarService(context).showErrorSnackbar(
         message:
@@ -39,7 +75,10 @@ class _AccountsPageState extends State<AccountsPage> {
       _loading = true;
     });
 
-    dynamic resopnse = await _apiService.initPlaidIntegration(context);
+    dynamic resopnse = await _apiService.initPlaidIntegration(
+      context,
+      accountType,
+    );
     if (resopnse != null && context.mounted && resopnse is LinkSuccess) {
       final publicToken = resopnse.toJson()['publicToken'];
       await _apiService.createPlaidAccessToken(context, publicToken);
@@ -114,7 +153,7 @@ class _AccountsPageState extends State<AccountsPage> {
             sub: 'Manage your financial accounts',
             action: ElevatedButton.icon(
               onPressed: () {
-                _initPlaidIntegration(context);
+                _showAddAccountDialog(context);
               },
               icon: const Icon(Icons.add, size: 20),
               label: const Text(
