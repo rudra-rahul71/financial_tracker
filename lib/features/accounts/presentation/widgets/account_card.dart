@@ -17,114 +17,147 @@ class _AccountCardState extends State<AccountCard> {
         previousSum + (account.available ?? 0.0),
   );
 
+  Widget _buildInstitutionInfo(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onPrimary,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Icon(
+            Icons.account_balance,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        const SizedBox(width: 12.0),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                widget.connection.value.$1.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              Text(
+                '${widget.connection.value.$2.length} accounts',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.inversePrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTotalBalance(BuildContext context, {CrossAxisAlignment alignment = CrossAxisAlignment.end}) {
+    return Column(
+      crossAxisAlignment: alignment,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        const Text(
+          'Total Balance',
+          style: TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '\$${_totalValue.toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 4.0,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 340;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Expanded(
-                  child: Row(
+                if (isCompact) ...[
+                  // Vertical layout for narrow screens
+                  _buildInstitutionInfo(context),
+                  const SizedBox(height: 12.0),
+                  _buildTotalBalance(context, alignment: CrossAxisAlignment.start),
+                ] else ...[
+                  // Horizontal layout for wider screens
+                  Row(
                     children: <Widget>[
-                      Container(
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Icon(
-                          Icons.account_balance,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              widget.connection.value.$1.name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                      Expanded(child: _buildInstitutionInfo(context)),
+                      const SizedBox(width: 8),
+                      Flexible(child: _buildTotalBalance(context)),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 12.0),
+                const Divider(height: 24.0),
+                ...widget.connection.value.$2.map((account) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                account.name,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
+                              Text(
+                                account.subetype,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.inversePrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Current: \$${(account.current ?? 0.0).toStringAsFixed(2)}',
                             ),
                             Text(
-                              '${widget.connection.value.$2.length} accounts',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.inversePrimary,
-                              ),
+                              'Available: \$${(account.available ?? 0.0).toStringAsFixed(2)}',
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Text(
-                      'Total Balance',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ],
                     ),
-                    Text(
-                      '\$${_totalValue.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                }),
               ],
-            ),
-            const SizedBox(height: 12.0),
-            const Divider(height: 24.0),
-            ...widget.connection.value.$2.map((account) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(account.name),
-                        Text(
-                          account.subetype,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Current: \$${(account.current ?? 0.0).toStringAsFixed(2)}',
-                        ),
-                        Text(
-                          'Available: \$${(account.available ?? 0.0).toStringAsFixed(2)}',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
+            );
+          },
         ),
       ),
     );

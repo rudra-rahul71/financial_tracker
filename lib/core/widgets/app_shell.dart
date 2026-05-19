@@ -10,14 +10,51 @@ class NavigatorScafold extends StatefulWidget {
   State<NavigatorScafold> createState() => _NavigatorScafoldState();
 }
 
-class _NavigatorScafoldState extends State<NavigatorScafold> {
+class _NavigatorScafoldState extends State<NavigatorScafold>
+    with SingleTickerProviderStateMixin {
   int _selectedIndex = 1;
   bool extendRail = false;
 
+  late final AnimationController _overlayController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 250),
+  );
+  late final Animation<Offset> _slideAnimation =
+      Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero).animate(
+        CurvedAnimation(parent: _overlayController, curve: Curves.easeOutCubic),
+      );
+  late final Animation<double> _scrimAnimation = CurvedAnimation(
+    parent: _overlayController,
+    curve: Curves.easeOut,
+  );
+
+  @override
+  void dispose() {
+    _overlayController.dispose();
+    super.dispose();
+  }
+
   void _toggleRail() {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
     setState(() {
       extendRail = !extendRail;
     });
+
+    if (isSmallScreen) {
+      if (extendRail) {
+        _overlayController.forward();
+      } else {
+        _overlayController.reverse();
+      }
+    }
+  }
+
+  void _collapseOverlay() {
+    setState(() {
+      extendRail = false;
+    });
+    _overlayController.reverse();
   }
 
   void _navigate(int index, BuildContext context) {
@@ -50,63 +87,112 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
     }
   }
 
+  static const _destinations = <NavigationRailDestination>[
+    NavigationRailDestination(
+      icon: Icon(Icons.menu),
+      label: Text('Financial Tracker'),
+    ),
+    NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
+    NavigationRailDestination(
+      icon: Icon(Icons.credit_card),
+      label: Text('Transactions'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.insights),
+      label: Text('Analytics'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.track_changes),
+      label: Text('Budgets'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.account_balance),
+      label: Text('Accounts'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.lightbulb),
+      label: Text('Insights'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.account_circle),
+      label: Text('Profile'),
+    ),
+  ];
+
+  Widget _buildRail(
+    BuildContext context, {
+    required bool extended,
+    bool autoCollapse = false,
+  }) {
+    return NavigationRail(
+      extended: extended,
+      backgroundColor: Theme.of(context).colorScheme.onPrimary,
+      selectedIndex: _selectedIndex,
+      groupAlignment: -1.0,
+      destinations: _destinations,
+      onDestinationSelected: (int index) {
+        if (index == 0) {
+          _toggleRail();
+        } else {
+          if (autoCollapse && extendRail) {
+            _collapseOverlay();
+          }
+          _navigate(index, context);
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
       body: SafeArea(
-        child: Row(
+        child: Stack(
           children: <Widget>[
-            NavigationRail(
-              extended: extendRail,
-              backgroundColor: Theme.of(context).colorScheme.onPrimary,
-              selectedIndex: _selectedIndex,
-              groupAlignment: -1.0,
-              destinations: <NavigationRailDestination>[
-                NavigationRailDestination(
-                  icon: extendRail
-                      ? const Icon(Icons.menu_open)
-                      : const Icon(Icons.menu),
-                  label: const Text('Financial Tracker'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('Home'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.credit_card),
-                  label: Text('Transactions'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.insights),
-                  label: Text('Analytics'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.track_changes),
-                  label: Text('Budgets'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.account_balance),
-                  label: Text('Accounts'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.lightbulb),
-                  label: Text('Insights'),
-                ),
-                const NavigationRailDestination(
-                  icon: Icon(Icons.account_circle),
-                  label: Text('Profile'),
-                ),
+            // Base layer: collapsed rail + page content
+            Row(
+              children: <Widget>[
+                if (isSmallScreen)
+                  _buildRail(context, extended: false)
+                else
+                  _buildRail(context, extended: extendRail),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(child: widget.child),
               ],
-              onDestinationSelected: (int index) {
-                if (index == 0) {
-                  _toggleRail();
-                } else {
-                  _navigate(index, context);
-                }
-              },
             ),
-            const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: widget.child),
+            // Overlay layer: animated scrim + sliding rail (small screens only)
+            if (isSmallScreen) ...[
+              // Scrim fades in/out
+              IgnorePointer(
+                ignoring: !extendRail,
+                child: FadeTransition(
+                  opacity: _scrimAnimation,
+                  child: GestureDetector(
+                    onTap: _collapseOverlay,
+                    child: Container(color: Colors.black54),
+                  ),
+                ),
+              ),
+              // Rail slides in from the left
+              Positioned(
+                top: 0,
+                bottom: 0,
+                left: 0,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Material(
+                    elevation: 16,
+                    child: _buildRail(
+                      context,
+                      extended: true,
+                      autoCollapse: true,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
