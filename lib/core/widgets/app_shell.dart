@@ -126,6 +126,8 @@ class _NavigatorScafoldState extends State<NavigatorScafold>
   }) {
     return NavigationRail(
       extended: extended,
+      minWidth: 60,
+      minExtendedWidth: 180,
       backgroundColor: Theme.of(context).colorScheme.onPrimary,
       selectedIndex: _selectedIndex,
       groupAlignment: -1.0,
