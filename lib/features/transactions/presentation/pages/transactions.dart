@@ -169,12 +169,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Widget tableCategoryDropdown() {
-    List<String> categoryList = _selectedTransactions
-        .expand((entry) => entry.value.$3)
-        .map((t) => t.type)
-        .toSet()
-        .toList()
-      ..sort();
+    List<String> categoryList =
+        _selectedTransactions
+            .expand((entry) => entry.value.$3)
+            .map((t) => t.type)
+            .toSet()
+            .toList()
+          ..sort();
     categoryList.insert(0, 'All Categories');
 
     if (!categoryList.contains(tableCategory)) {

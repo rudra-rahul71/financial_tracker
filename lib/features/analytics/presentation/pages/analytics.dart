@@ -57,7 +57,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         return false;
       }
     }).toList();
-        
+
     for (final transaction in transactions) {
       if (transaction.isHidden) continue;
 

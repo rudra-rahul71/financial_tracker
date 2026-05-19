@@ -83,6 +83,9 @@ class _AccountsPageState extends State<AccountsPage> {
       final publicToken = resopnse.toJson()['publicToken'];
       await _apiService.createPlaidAccessToken(context, publicToken);
 
+      // Brief delay to allow Plaid to prepare transaction data
+      await Future.delayed(const Duration(seconds: 3));
+
       if (context.mounted) {
         await _apiService.searchAccounts(context);
       }
