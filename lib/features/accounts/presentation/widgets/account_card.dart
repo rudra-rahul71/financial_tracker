@@ -11,11 +11,25 @@ class AccountCard extends StatefulWidget {
 }
 
 class _AccountCardState extends State<AccountCard> {
-  late final _totalValue = widget.connection.value.$2.fold(
-    0.0,
-    (double previousSum, Account account) =>
-        previousSum + (account.available ?? 0.0),
-  );
+  bool get _isCreditCard =>
+      widget.connection.value.$2.any((account) => account.type == 'credit');
+
+  late final _totalValue = widget.connection.value.$2.fold(0.0, (
+    double previousSum,
+    Account account,
+  ) {
+    if (account.type == 'credit') {
+      // Credit card: negate the current balance (it's debt)
+      return previousSum - (account.current ?? 0.0);
+    }
+    return previousSum + (account.available ?? 0.0);
+  });
+
+  Color _balanceColor(BuildContext context, double value) {
+    if (value > 0) return Theme.of(context).colorScheme.inversePrimary;
+    if (value < 0) return Theme.of(context).colorScheme.onError;
+    return Colors.grey;
+  }
 
   Widget _buildInstitutionInfo(BuildContext context) {
     return Row(
@@ -60,22 +74,29 @@ class _AccountCardState extends State<AccountCard> {
     );
   }
 
-  Widget _buildTotalBalance(BuildContext context, {CrossAxisAlignment alignment = CrossAxisAlignment.end}) {
+  Widget _buildTotalBalance(
+    BuildContext context, {
+    CrossAxisAlignment alignment = CrossAxisAlignment.end,
+  }) {
+    final displayValue = _totalValue;
+    final absValue = displayValue.abs().toStringAsFixed(2);
+
     return Column(
       crossAxisAlignment: alignment,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        const Text(
-          'Total Balance',
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+        Text(
+          _isCreditCard ? 'Total Owed' : 'Total Balance',
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
         ),
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
-            '\$${_totalValue.toStringAsFixed(2)}',
-            style: const TextStyle(
+            '\$$absValue',
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
+              color: _balanceColor(context, displayValue),
             ),
             maxLines: 1,
           ),
@@ -101,20 +122,24 @@ class _AccountCardState extends State<AccountCard> {
                   // Vertical layout for narrow screens
                   _buildInstitutionInfo(context),
                   const SizedBox(height: 12.0),
-                  _buildTotalBalance(context, alignment: CrossAxisAlignment.start),
+                  _buildTotalBalance(
+                    context,
+                    alignment: CrossAxisAlignment.start,
+                  ),
                 ] else ...[
                   // Horizontal layout for wider screens
                   Row(
                     children: <Widget>[
                       Expanded(child: _buildInstitutionInfo(context)),
                       const SizedBox(width: 8),
-                      Flexible(child: _buildTotalBalance(context)),
+                      _buildTotalBalance(context),
                     ],
                   ),
                 ],
                 const SizedBox(height: 12.0),
                 const Divider(height: 24.0),
                 ...widget.connection.value.$2.map((account) {
+                  final isCreditType = account.type == 'credit';
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 7),
                     child: Row(
@@ -133,24 +158,45 @@ class _AccountCardState extends State<AccountCard> {
                               Text(
                                 account.subetype,
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.inversePrimary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.inversePrimary,
                                 ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Current: \$${(account.current ?? 0.0).toStringAsFixed(2)}',
-                            ),
-                            Text(
-                              'Available: \$${(account.available ?? 0.0).toStringAsFixed(2)}',
-                            ),
-                          ],
-                        ),
+                        if (isCreditType)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              _buildBalanceRow(
+                                'Balance Owed',
+                                account.current ?? 0.0,
+                              ),
+                              if (account.available != null)
+                                _buildBalanceRow(
+                                  'Credit Limit',
+                                  (account.available ?? 0.0) +
+                                      (account.current ?? 0.0),
+                                ),
+                            ],
+                          )
+                        else
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              _buildBalanceRow(
+                                'Current',
+                                account.current ?? 0.0,
+                              ),
+                              _buildBalanceRow(
+                                'Available',
+                                account.available ?? 0.0,
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   );
@@ -161,5 +207,11 @@ class _AccountCardState extends State<AccountCard> {
         ),
       ),
     );
+  }
+
+  Widget _buildBalanceRow(String label, double value) {
+    final prefix = value < 0 ? '-\$' : '\$';
+    final absValue = value.abs().toStringAsFixed(2);
+    return Text('$label: $prefix$absValue');
   }
 }

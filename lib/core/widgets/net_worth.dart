@@ -33,18 +33,26 @@ class NetWorth extends StatelessWidget {
                     children: [
                       const Text(
                         'Total Net Worth',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '\$${totalValue.toStringAsFixed(2)}',
+                          '\$${totalValue.abs().toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: amountFontSize,
                             fontWeight: FontWeight.bold,
                             height: 1.0,
+                            color: totalValue > 0
+                                ? Theme.of(context).colorScheme.inversePrimary
+                                : totalValue < 0
+                                ? Theme.of(context).colorScheme.onError
+                                : Colors.grey,
                           ),
                           maxLines: 1,
                         ),
@@ -76,12 +84,16 @@ class NetWorth extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimaryFixedVariant,
                         blurRadius: 10,
                       ),
                     ],
                   ),
-                  child: Center(child: Icon(Icons.show_chart, size: iconInnerSize)),
+                  child: Center(
+                    child: Icon(Icons.show_chart, size: iconInnerSize),
+                  ),
                 ),
               ],
             ),

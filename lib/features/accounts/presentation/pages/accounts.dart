@@ -108,11 +108,13 @@ class _AccountsPageState extends State<AccountsPage> {
     List<Account> accounts = await _databaseService.getAccounts();
 
     _totalAccounts = accounts.length;
-    _totalValue = accounts.fold(
-      0.0,
-      (double previousSum, Account account) =>
-          previousSum + (account.available ?? 0.0),
-    );
+    _totalValue = accounts.fold(0.0, (double previousSum, Account account) {
+      if (account.type == 'credit') {
+        // Credit card balances are debt — subtract from net worth
+        return previousSum - (account.current ?? 0.0);
+      }
+      return previousSum + (account.available ?? 0.0);
+    });
 
     Map<String, (Item, List<Account>)> groupedAccounts = {};
     for (final account in accounts) {

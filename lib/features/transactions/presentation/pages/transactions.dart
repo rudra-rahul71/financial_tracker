@@ -360,22 +360,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           action: tableCategoryDropdown(),
                           body: TransactionTable(
                             selectedCategory: tableCategory,
+                            showBalance: _selectedTransactions.length == 1,
                             transactions: _selectedTransactions
                                 .expand((entry) => entry.value.$3)
                                 .toList(),
-                            total: _selectedTransactions.fold(
-                              0.0,
-                              (
-                                double previousSum,
-                                MapEntry<
-                                  String,
-                                  (Item, Account, List<TransactionEntry>)
-                                >
-                                entry,
-                              ) =>
-                                  previousSum +
-                                  (entry.value.$2.available ?? 0).toDouble(),
-                            ),
+                            total: _selectedTransactions.length == 1
+                                ? (_selectedTransactions.first.value.$2.available ?? 0).toDouble()
+                                : 0.0,
                             onCategoryChanged: () {
                               _updateTransactions();
                             },

@@ -19,7 +19,7 @@ class TransactionHistory extends StatefulWidget {
 class _TransactionHistoryState extends State<TransactionHistory> {
   @override
   Widget build(BuildContext context) {
-    List<(Item, Account, List<TransactionEntry>, Set<String>)> list = [];
+    List<(Item, Account, List<TransactionEntry>, Set<String>, bool)> list = [];
     DateTime now = DateTime.now();
     double maxVal = -double.maxFinite;
     double minVal = double.maxFinite;
@@ -34,7 +34,10 @@ class _TransactionHistoryState extends State<TransactionHistory> {
       List<TransactionEntry> transactionList = [];
       Set<String> activeDates = {};
 
-      double currentBalance = entry.value.$2.available ?? 0.0;
+      final bool isCreditCard = entry.value.$2.type == 'credit';
+      double currentBalance = isCreditCard
+          ? (entry.value.$2.current ?? 0.0).abs()
+          : (entry.value.$2.available ?? 0.0);
       Map<String, double> dailyTransactions = {};
 
       for (final transaction in entry.value.$3) {
@@ -51,6 +54,8 @@ class _TransactionHistoryState extends State<TransactionHistory> {
         String dateString =
             '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
 
+        double chartBalance = isCreditCard ? balanceTracker.abs() : balanceTracker;
+
         transactionList.add(
           TransactionEntry(
             id: '',
@@ -59,13 +64,13 @@ class _TransactionHistoryState extends State<TransactionHistory> {
             date: dateString,
             type: '',
             subtype: '',
-            amount: balanceTracker,
+            amount: chartBalance,
             isPending: false,
           ),
         );
 
-        maxVal = math.max(maxVal, balanceTracker);
-        minVal = math.min(minVal, balanceTracker);
+        maxVal = math.max(maxVal, chartBalance);
+        minVal = math.min(minVal, chartBalance);
 
         if (dailyTransactions.containsKey(dateString)) {
           balanceTracker += dailyTransactions[dateString]!;
@@ -77,7 +82,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
           '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       activeDates.add(todayString);
 
-      list.add((entry.value.$1, entry.value.$2, transactionList, activeDates));
+      list.add((entry.value.$1, entry.value.$2, transactionList, activeDates, isCreditCard));
     }
     dist = maxVal - minVal;
 
@@ -215,7 +220,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                           radius: 6,
                           color: Theme.of(context).colorScheme.onPrimary,
                           strokeWidth: 2,
-                          strokeColor: Theme.of(context).colorScheme.primary,
+                          strokeColor: barData.color ?? Theme.of(context).colorScheme.primary,
                         );
                       },
                     ),
@@ -225,6 +230,11 @@ class _TransactionHistoryState extends State<TransactionHistory> {
             ),
             lineBarsData: [
               ...list.map((entry) {
+                final isCreditLine = entry.$5;
+                final lineColor = isCreditLine
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary;
+
                 final spots = entry.$3.map((transaction) {
                   return FlSpot(
                     DateTime.parse(
@@ -239,7 +249,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
 
                 return LineChartBarData(
                   isCurved: false,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: lineColor,
                   barWidth: 2.5,
                   dotData: FlDotData(
                     show: true,
@@ -263,7 +273,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                         radius: 4,
                         color: Theme.of(context).colorScheme.onPrimary,
                         strokeWidth: 2,
-                        strokeColor: Theme.of(context).colorScheme.primary,
+                        strokeColor: lineColor,
                       );
                     },
                   ),

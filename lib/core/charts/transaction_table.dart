@@ -8,6 +8,7 @@ class TransactionTable extends StatefulWidget {
   final List<TransactionEntry> transactions;
   final VoidCallback onCategoryChanged;
   final String selectedCategory;
+  final bool showBalance;
 
   const TransactionTable({
     super.key,
@@ -15,6 +16,7 @@ class TransactionTable extends StatefulWidget {
     required this.transactions,
     required this.onCategoryChanged,
     required this.selectedCategory,
+    this.showBalance = true,
   });
 
   @override
@@ -54,12 +56,16 @@ class _TransactionTableState extends State<TransactionTable> {
       (a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)),
     );
 
-    balanceTracker = [(widget.transactions.first, widget.total)];
-    for (int i = 1; i < widget.transactions.length; i++) {
-      balanceTracker.add((
-        widget.transactions[i],
-        balanceTracker[i - 1].$2 + widget.transactions[i - 1].amount,
-      ));
+    if (widget.showBalance) {
+      balanceTracker = [(widget.transactions.first, widget.total)];
+      for (int i = 1; i < widget.transactions.length; i++) {
+        balanceTracker.add((
+          widget.transactions[i],
+          balanceTracker[i - 1].$2 + widget.transactions[i - 1].amount,
+        ));
+      }
+    } else {
+      balanceTracker = widget.transactions.map((t) => (t, 0.0)).toList();
     }
   }
 
@@ -243,20 +249,22 @@ class _TransactionTableState extends State<TransactionTable> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Flexible(
-                        child: Text(
-                          'Final Balance: ${eodBalance >= 0 ? '' : '-'}\$${eodBalance.abs().toStringAsFixed(2)}',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: eodBalance > 0
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.error,
+                      if (widget.showBalance) ...[
+                        const SizedBox(width: 16),
+                        Flexible(
+                          child: Text(
+                            'Final Balance: ${eodBalance >= 0 ? '' : '-'}\$${eodBalance.abs().toStringAsFixed(2)}',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: eodBalance > 0
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.error,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
