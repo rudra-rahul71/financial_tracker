@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class TransactionTable extends StatefulWidget {
   final double total;
   final List<TransactionEntry> transactions;
-  final VoidCallback onCategoryChanged;
+  final Future<void> Function() onCategoryChanged;
   final String selectedCategory;
   final bool showBalance;
 
@@ -25,6 +25,9 @@ class TransactionTable extends StatefulWidget {
 
 class _TransactionTableState extends State<TransactionTable> {
   List<(TransactionEntry, double)> balanceTracker = [];
+  String? _updatingTransactionId;
+
+
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
@@ -195,11 +198,32 @@ class _TransactionTableState extends State<TransactionTable> {
     );
 
     if (result != null && result.isNotEmpty) {
-      await DatabaseService.instance.saveTransactionPreference(
-        transaction.id,
-        category: result,
-      );
-      widget.onCategoryChanged();
+      if (!mounted) return;
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      final errorColor = Theme.of(context).colorScheme.error;
+      setState(() {
+        _updatingTransactionId = transaction.id;
+      });
+      try {
+        await DatabaseService.instance.saveTransactionPreference(
+          transaction.id,
+          category: result,
+        );
+        await widget.onCategoryChanged();
+      } catch (e) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to update category: $e'),
+            backgroundColor: errorColor,
+          ),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _updatingTransactionId = null;
+          });
+        }
+      }
     }
   }
 
@@ -269,109 +293,143 @@ class _TransactionTableState extends State<TransactionTable> {
                   ),
                 ),
                 ...entries.map((entry) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).dividerColor.withValues(alpha: 0.5),
+                  final isUpdating = _updatingTransactionId == entry.$1.id;
+
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: isUpdating ? 0.5 : 1.0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isUpdating
+                            ? Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.15)
+                            : null,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Theme.of(
+                              context,
+                            ).dividerColor.withValues(alpha: 0.5),
+                          ),
                         ),
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                entry.$1.name +
-                                    (entry.$1.isPending ? ' (Pending)' : ''),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: entry.$1.isPending
-                                      ? FontStyle.italic
-                                      : null,
-                                  color: entry.$1.isPending
-                                      ? Theme.of(context).colorScheme.onSurface
-                                            .withValues(alpha: 0.6)
-                                      : null,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  entry.$1.name +
+                                      (entry.$1.isPending ? ' (Pending)' : ''),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    fontStyle: entry.$1.isPending
+                                        ? FontStyle.italic
+                                        : null,
+                                    color: entry.$1.isPending
+                                        ? Theme.of(context).colorScheme.onSurface
+                                              .withValues(alpha: 0.6)
+                                        : null,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                getCategoryLabel(entry.$1.type),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                const SizedBox(height: 4),
+                                Text(
+                                  getCategoryLabel(entry.$1.type),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '\$${entry.$1.amount.abs().toStringAsFixed(2)}',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: entry.$1.amount < 0
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.error,
+                          const SizedBox(width: 8),
+                          Text(
+                            '\$${entry.$1.amount.abs().toStringAsFixed(2)}',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: entry.$1.amount < 0
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.error,
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 40,
-                          child: PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_vert, size: 18),
-                            onSelected: (value) async {
-                              if (value == 'edit') {
-                                _editCategory(entry.$1);
-                              } else if (value == 'hide') {
-                                await DatabaseService.instance
-                                    .saveTransactionPreference(
-                                      entry.$1.id,
-                                      isHidden: true,
-                                    );
-                                widget.onCategoryChanged();
-                              } else if (value == 'unhide') {
-                                await DatabaseService.instance
-                                    .saveTransactionPreference(
-                                      entry.$1.id,
-                                      isHidden: false,
-                                    );
-                                widget.onCategoryChanged();
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 'edit',
-                                child: Text('Edit Category'),
-                              ),
-                              PopupMenuItem(
-                                value: entry.$1.isHidden ? 'unhide' : 'hide',
-                                child: Text(
-                                  entry.$1.isHidden
-                                      ? 'Unhide from Analytics'
-                                      : 'Hide from Analytics',
+                          SizedBox(
+                            width: 40,
+                            child: isUpdating
+                                ? const Center(
+                                    child: SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                  )
+                                : PopupMenuButton<String>(
+                                    icon: const Icon(Icons.more_vert, size: 18),
+                                    onSelected: (value) async {
+                                      if (value == 'edit') {
+                                        _editCategory(entry.$1);
+                                      } else if (value == 'hide' || value == 'unhide') {
+                                        final isHidden = value == 'hide';
+                                        final scaffoldMessenger = ScaffoldMessenger.of(context);
+                                        final errorColor = Theme.of(context).colorScheme.error;
+                                        setState(() {
+                                          _updatingTransactionId = entry.$1.id;
+                                        });
+                                        try {
+                                          await DatabaseService.instance
+                                              .saveTransactionPreference(
+                                                entry.$1.id,
+                                                isHidden: isHidden,
+                                              );
+                                          await widget.onCategoryChanged();
+                                        } catch (e) {
+                                          scaffoldMessenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text('Failed to update preference: $e'),
+                                              backgroundColor: errorColor,
+                                            ),
+                                          );
+                                        } finally {
+                                          if (mounted) {
+                                            setState(() {
+                                              _updatingTransactionId = null;
+                                            });
+                                          }
+                                        }
+                                      }
+                                    },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: Text('Edit Category'),
+                                    ),
+                                    PopupMenuItem(
+                                      value: entry.$1.isHidden ? 'unhide' : 'hide',
+                                      child: Text(
+                                        entry.$1.isHidden
+                                            ? 'Unhide from Analytics'
+                                            : 'Hide from Analytics',
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ],
                     ),
-                  );
-                }),
+                  ),
+                );
+              }),
               ],
             );
           }),

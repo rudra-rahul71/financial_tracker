@@ -9,6 +9,7 @@ import 'package:financial_tracker/features/insights/presentation/pages/insights.
 import 'package:financial_tracker/features/profile/presentation/pages/profile.dart';
 import 'package:financial_tracker/features/transactions/presentation/pages/transactions.dart';
 import 'package:financial_tracker/core/network/api_service.dart';
+import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:financial_tracker/core/widgets/app_shell.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,6 +28,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   setupLocator();
+
+  FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+    if (user == null) {
+      await DatabaseService.instance.clearAllData();
+    }
+  });
+
   runApp(MyApp());
 }
 

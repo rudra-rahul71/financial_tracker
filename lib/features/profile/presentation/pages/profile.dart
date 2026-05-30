@@ -1,4 +1,5 @@
 import 'package:financial_tracker/features/auth/presentation/pages/sign_in.dart';
+import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -14,9 +15,12 @@ class ProfilePage extends StatefulWidget {
 User? user;
 
 SignedOutAction _signOut() {
-  return SignedOutAction((context) {
+  return SignedOutAction((context) async {
+    await DatabaseService.instance.clearAllData();
     user = FirebaseAuth.instance.currentUser;
-    context.go('/auth/sign-in');
+    if (context.mounted) {
+      context.go('/auth/sign-in');
+    }
   });
 }
 

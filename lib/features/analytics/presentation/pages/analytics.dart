@@ -21,6 +21,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   final ApiService _apiService = getIt<ApiService>();
   List<MapEntry<String, double>> _transactionByCategory = [];
   bool _loading = false;
+  bool _showIncome = false;
 
   Future<void> _updateDays(int days) async {
     setState(() {
@@ -29,59 +30,58 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
     await _apiService.searchAccounts(context);
     await _updateTransactions();
-
-    setState(() {
-      _loading = false;
-    });
   }
 
-  Future<void> _updateTransactions() async {
-    final Map<String, double> groupedTransactions = {};
-
-    List<TransactionEntry> allTransactions = await _databaseService
-        .getTransactions();
-
-    DateTime now = DateTime.now();
-    DateTime threshold = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).subtract(Duration(days: ApiService.interval));
-
-    List<TransactionEntry> transactions = allTransactions.where((t) {
-      if (t.date.isEmpty) return false;
-      try {
-        DateTime transactionDate = DateTime.parse(t.date);
-        return !transactionDate.isBefore(threshold);
-      } catch (e) {
-        return false;
-      }
-    }).toList();
-
-    for (final transaction in transactions) {
-      if (transaction.isHidden) continue;
-
-      if (transaction.amount > 0) {
-        groupedTransactions.putIfAbsent(transaction.type, () => 0.0);
-
-        double currentValue = groupedTransactions[transaction.type]!;
-        double newValue = currentValue + transaction.amount;
-
-        if (newValue == 0) {
-          groupedTransactions.remove(transaction.type);
-        } else {
-          groupedTransactions[transaction.type] = newValue;
-        }
-      }
+  Future<void> _updateTransactions({bool showLoader = true}) async {
+    if (showLoader) {
+      setState(() {
+        _loading = true;
+      });
     }
 
-    _transactionByCategory = groupedTransactions.entries.toList();
+    try {
+      final Map<String, double> groupedTransactions = {};
 
-    setState(() {
+      DateTime now = DateTime.now();
+      DateTime threshold = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: ApiService.interval));
+
+      List<TransactionEntry> allTransactions = await _databaseService
+          .getTransactions(since: threshold);
+
+      List<TransactionEntry> transactions = allTransactions;
+
+      for (final transaction in transactions) {
+        if (transaction.isHidden) continue;
+
+        final isMatchingMode = _showIncome ? transaction.amount < 0 : transaction.amount > 0;
+        if (isMatchingMode) {
+          final amountValue = transaction.amount.abs();
+          groupedTransactions.putIfAbsent(transaction.type, () => 0.0);
+
+          double currentValue = groupedTransactions[transaction.type]!;
+          double newValue = currentValue + amountValue;
+
+          if (newValue == 0) {
+            groupedTransactions.remove(transaction.type);
+          } else {
+            groupedTransactions[transaction.type] = newValue;
+          }
+        }
+      }
+
+      _transactionByCategory = groupedTransactions.entries.toList();
       _transactionByCategory.sort((a, b) {
         return b.value.compareTo(a.value);
       });
-    });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -99,8 +99,34 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         children: <Widget>[
           PageHeader(
             header: 'Analytics',
-            sub: 'Deep insights into your spending patterns',
+            sub: _showIncome
+                ? 'Deep insights into your income patterns'
+                : 'Deep insights into your spending patterns',
             action: DayDropdown(daysUpdated: _updateDays),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: SegmentedButton<bool>(
+              segments: const <ButtonSegment<bool>>[
+                ButtonSegment<bool>(
+                  value: false,
+                  label: Text('Spending'),
+                  icon: Icon(Icons.arrow_downward),
+                ),
+                ButtonSegment<bool>(
+                  value: true,
+                  label: Text('Income'),
+                  icon: Icon(Icons.arrow_upward),
+                ),
+              ],
+              selected: <bool>{_showIncome},
+              onSelectionChanged: (Set<bool> newSelection) {
+                setState(() {
+                  _showIncome = newSelection.first;
+                  _updateTransactions();
+                });
+              },
+            ),
           ),
           Expanded(
             child: _loading
@@ -114,10 +140,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           title: 'Distribution',
                           body: DistributionPieChart(
                             groupedTransactions: _transactionByCategory,
+                            isIncome: _showIncome,
                           ),
                         ),
                         BasicCard(
-                          title: 'Spending by Category',
+                          title: _showIncome ? 'Income by Category' : 'Spending by Category',
                           body: CategorySpending(
                             groupedTransactions: _transactionByCategory,
                           ),

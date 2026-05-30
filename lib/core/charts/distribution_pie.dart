@@ -4,8 +4,13 @@ import 'package:flutter/material.dart';
 
 class DistributionPieChart extends StatefulWidget {
   final List<MapEntry<String, double>> groupedTransactions;
+  final bool isIncome;
 
-  const DistributionPieChart({super.key, required this.groupedTransactions});
+  const DistributionPieChart({
+    super.key,
+    required this.groupedTransactions,
+    this.isIncome = false,
+  });
 
   @override
   State<DistributionPieChart> createState() => _DistributionPieChartState();
@@ -58,6 +63,8 @@ class _DistributionPieChartState extends State<DistributionPieChart> {
     }
 
     Widget getOverview() {
+      final valueLabel = widget.isIncome ? 'Received' : 'Spent';
+      final totalLabel = widget.isIncome ? 'Total Income' : 'Total Spent';
       return _selected != null && _selected != -1
           ? Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +73,7 @@ class _DistributionPieChartState extends State<DistributionPieChart> {
                   'Category: ${getCategoryLabel(widget.groupedTransactions[_selected!].key)}',
                 ),
                 Text(
-                  'Spent: \$${widget.groupedTransactions[_selected!].value.toStringAsFixed(2)}',
+                  '$valueLabel: \$${widget.groupedTransactions[_selected!].value.toStringAsFixed(2)}',
                 ),
               ],
             )
@@ -74,7 +81,7 @@ class _DistributionPieChartState extends State<DistributionPieChart> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Analytics Overview'),
-                Text('Total Spent: \$${totalValue.toStringAsFixed(2)}'),
+                Text('$totalLabel: \$${totalValue.toStringAsFixed(2)}'),
               ],
             );
     }

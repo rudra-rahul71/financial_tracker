@@ -105,38 +105,56 @@ class _AccountsPageState extends State<AccountsPage> {
   }
 
   Future<void> _updateAccounts() async {
-    List<Account> accounts = await _databaseService.getAccounts();
-
-    _totalAccounts = accounts.length;
-    _totalValue = accounts.fold(0.0, (double previousSum, Account account) {
-      if (account.type == 'credit') {
-        // Credit card balances are debt — subtract from net worth
-        return previousSum - (account.current ?? 0.0);
-      }
-      return previousSum + (account.available ?? 0.0);
-    });
-
-    Map<String, (Item, List<Account>)> groupedAccounts = {};
-    for (final account in accounts) {
-      final itemId = account.itemId;
-
-      _databaseService.getItemById(itemId);
-      final item = await _databaseService.getItemById(itemId);
-
-      if (item == null) {
-        continue;
-      }
-
-      groupedAccounts.update(
-        itemId,
-        (existingTuple) => (existingTuple.$1, [...existingTuple.$2, account]),
-        ifAbsent: () => (item, [account]),
-      );
-    }
-
     setState(() {
-      _connections = groupedAccounts.entries;
+      _loading = true;
     });
+
+    try {
+      // Fetch accounts and items in parallel once
+      final results = await Future.wait([
+        _databaseService.getAccounts(),
+        _databaseService.getItems(),
+      ]);
+
+      List<Account> accounts = results[0] as List<Account>;
+      List<Item> items = results[1] as List<Item>;
+
+      _totalAccounts = accounts.length;
+      _totalValue = accounts.fold(0.0, (double previousSum, Account account) {
+        if (account.type == 'credit') {
+          // Credit card balances are debt — subtract from net worth
+          return previousSum - (account.current ?? 0.0);
+        }
+        return previousSum + (account.available ?? 0.0);
+      });
+
+      // Create high-performance in-memory lookup map
+      final Map<String, Item> itemMap = {for (var i in items) i.id: i};
+
+      Map<String, (Item, List<Account>)> groupedAccounts = {};
+      for (final account in accounts) {
+        final itemId = account.itemId;
+        final item = itemMap[itemId];
+
+        if (item == null) {
+          continue;
+        }
+
+        groupedAccounts.update(
+          itemId,
+          (existingTuple) => (existingTuple.$1, [...existingTuple.$2, account]),
+          ifAbsent: () => (item, [account]),
+        );
+      }
+
+      setState(() {
+        _connections = groupedAccounts.entries;
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   @override

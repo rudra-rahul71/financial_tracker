@@ -67,10 +67,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     await _apiService.searchAccounts(context);
     await _updateTransactions();
-
-    setState(() {
-      _loading = false;
-    });
   }
 
   void _updateTransactionGroup(String key) {
@@ -82,53 +78,69 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
   }
 
-  Future<void> _updateTransactions() async {
-    final Map<String, (Item, Account, List<TransactionEntry>)>
-    groupedTransactions = {};
-
-    DateTime now = DateTime.now();
-    DateTime threshold = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).subtract(Duration(days: ApiService.interval));
-
-    List<TransactionEntry> allTransactions = await _databaseService
-        .getTransactions();
-
-    transactions = allTransactions.where((t) {
-      if (t.date.isEmpty) return false;
-      try {
-        DateTime transactionDate = DateTime.parse(t.date);
-        return !transactionDate.isBefore(threshold);
-      } catch (e) {
-        return false;
-      }
-    }).toList();
-
-    for (final transaction in transactions) {
-      if (transaction.accountId.isEmpty) {
-        continue;
-      }
-
-      final Account? accoount = await _databaseService.getAccountById(
-        transaction.accountId,
-      );
-      if (accoount == null) continue;
-
-      final Item? item = await _databaseService.getItemById(accoount.itemId);
-      if (item == null) continue;
-
-      groupedTransactions
-          .putIfAbsent(transaction.accountId, () => (item, accoount, []))
-          .$3
-          .add(transaction);
+  Future<void> _updateTransactions({bool showLoader = true}) async {
+    if (showLoader) {
+      setState(() {
+        _loading = true;
+      });
     }
-    setState(() {
-      _groupedTransactions = groupedTransactions.entries;
-      _selectedTransactions = groupedTransactions.entries;
-      _updateInfoCards();
-    });
+
+    try {
+      final Map<String, (Item, Account, List<TransactionEntry>)>
+      groupedTransactions = {};
+
+      DateTime now = DateTime.now();
+      DateTime threshold = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: ApiService.interval));
+
+      // Fetch all required data in parallel once
+      final results = await Future.wait([
+        _databaseService.getTransactions(since: threshold),
+        _databaseService.getAccounts(),
+        _databaseService.getItems(),
+      ]);
+
+      List<TransactionEntry> allTransactions = results[0] as List<TransactionEntry>;
+      List<Account> accounts = results[1] as List<Account>;
+      List<Item> items = results[2] as List<Item>;
+
+      // Create high-performance in-memory lookup maps
+      final Map<String, Account> accountMap = {for (var a in accounts) a.id: a};
+      final Map<String, Item> itemMap = {for (var i in items) i.id: i};
+
+      transactions = allTransactions;
+
+      for (final transaction in transactions) {
+        if (transaction.accountId.isEmpty) {
+          continue;
+        }
+
+        final Account? accoount = accountMap[transaction.accountId];
+        if (accoount == null) continue;
+
+        final Item? item = itemMap[accoount.itemId];
+        if (item == null) continue;
+
+        groupedTransactions
+            .putIfAbsent(transaction.accountId, () => (item, accoount, []))
+            .$3
+            .add(transaction);
+      }
+      setState(() {
+        _groupedTransactions = groupedTransactions.entries;
+        _selectedTransactions = groupedTransactions.entries;
+        _updateInfoCards();
+      });
+    } finally {
+      if (showLoader) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
   Widget categoryDropdown() {
@@ -367,8 +379,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             total: _selectedTransactions.length == 1
                                 ? (_selectedTransactions.first.value.$2.available ?? 0).toDouble()
                                 : 0.0,
-                            onCategoryChanged: () {
-                              _updateTransactions();
+                            onCategoryChanged: () async {
+                              await _updateTransactions(showLoader: false);
                             },
                           ),
                         ),

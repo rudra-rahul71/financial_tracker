@@ -61,7 +61,7 @@ class TransactionEntry {
   }
 
   factory TransactionEntry.fromMap(Map<String, dynamic> map) {
-    return TransactionEntry(
+    final t = TransactionEntry(
       id: map[columnId] as String,
       accountId: map[columnAccountId] as String,
       name: map[columnName] as String,
@@ -69,8 +69,17 @@ class TransactionEntry {
       type: map[columnType] as String,
       subtype: map[columnSubtype] as String,
       amount: (map[columnAmount] as num).toDouble(),
-      isPending: (map[columnIsPending] as int) == 1,
+      isPending: map[columnIsPending] is bool
+          ? map[columnIsPending] as bool
+          : (map[columnIsPending] as int) == 1,
     );
+    if (map['customCategory'] != null) {
+      t.type = map['customCategory'] as String;
+    }
+    if (map['isHidden'] != null) {
+      t.isHidden = map['isHidden'] as bool;
+    }
+    return t;
   }
 
   TransactionEntry copy() {
