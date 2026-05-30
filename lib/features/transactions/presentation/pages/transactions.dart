@@ -27,6 +27,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   _groupedTransactions = [];
   Iterable<MapEntry<String, (Item, Account, List<TransactionEntry>)>>
   _selectedTransactions = [];
+  Set<String> _selectedAccountKeys = {};
   List<TransactionEntry> transactions = [];
   String category = 'Balance';
   String tableCategory = 'All Categories';
@@ -69,11 +70,30 @@ class _TransactionsPageState extends State<TransactionsPage> {
     await _updateTransactions();
   }
 
-  void _updateTransactionGroup(String key) {
+  void _toggleAccountSelection(String key) {
     setState(() {
-      _selectedTransactions = key == '1'
-          ? _groupedTransactions
-          : [_groupedTransactions.firstWhere((e) => e.key == key)];
+      if (_selectedAccountKeys.contains(key)) {
+        _selectedAccountKeys.remove(key);
+      } else {
+        _selectedAccountKeys.add(key);
+      }
+      _selectedTransactions = _groupedTransactions.where((e) => _selectedAccountKeys.contains(e.key));
+      _updateInfoCards();
+    });
+  }
+
+  void _selectAllAccounts() {
+    setState(() {
+      _selectedAccountKeys = _groupedTransactions.map((e) => e.key).toSet();
+      _selectedTransactions = _groupedTransactions;
+      _updateInfoCards();
+    });
+  }
+
+  void _clearAllAccounts() {
+    setState(() {
+      _selectedAccountKeys.clear();
+      _selectedTransactions = [];
       _updateInfoCards();
     });
   }
@@ -131,7 +151,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
       }
       setState(() {
         _groupedTransactions = groupedTransactions.entries;
-        _selectedTransactions = groupedTransactions.entries;
+        if (_selectedAccountKeys.isEmpty) {
+          _selectedAccountKeys = groupedTransactions.keys.toSet();
+        } else {
+          _selectedAccountKeys = _selectedAccountKeys.intersection(groupedTransactions.keys.toSet());
+          if (_selectedAccountKeys.isEmpty && groupedTransactions.isNotEmpty) {
+            _selectedAccountKeys = groupedTransactions.keys.toSet();
+          }
+        }
+        _selectedTransactions = _groupedTransactions.where((e) => _selectedAccountKeys.contains(e.key));
         _updateInfoCards();
       });
     } finally {
@@ -232,6 +260,198 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
+  void _showMultiSelectDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.account_balance,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Select Accounts',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: () {
+                              setDialogState(() {
+                                _selectAllAccounts();
+                              });
+                            },
+                            icon: const Icon(Icons.select_all, size: 16),
+                            label: const Text(
+                              'Select All',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: () {
+                              setDialogState(() {
+                                _clearAllAccounts();
+                              });
+                            },
+                            icon: const Icon(Icons.deselect, size: 16),
+                            label: const Text(
+                              'Clear All',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              foregroundColor: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 16),
+                    Flexible(
+                      child: Container(
+                        constraints: const BoxConstraints(maxHeight: 300),
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: _groupedTransactions.map((entry) {
+                            final key = entry.key;
+                            final isSelected = _selectedAccountKeys.contains(key);
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer
+                                        .withValues(alpha: 0.15)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+                                      : Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                  width: 1,
+                                ),
+                              ),
+                              child: CheckboxListTile(
+                                title: Text(
+                                  '${entry.value.$1.name} - ${entry.value.$2.name}',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                value: isSelected,
+                                activeColor: Theme.of(context).colorScheme.primary,
+                                checkboxShape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 0,
+                                ),
+                                onChanged: (bool? checked) {
+                                  setDialogState(() {
+                                    _toggleAccountSelection(key);
+                                  });
+                                },
+                                controlAffinity: ListTileControlAffinity.leading,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Done',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget accountSelector() {
+    String label;
+    if (_selectedAccountKeys.length == _groupedTransactions.length && _groupedTransactions.isNotEmpty) {
+      label = 'All Accounts';
+    } else if (_selectedAccountKeys.isEmpty) {
+      label = 'No Accounts';
+    } else if (_selectedAccountKeys.length == 1) {
+      final selectedEntry = _groupedTransactions.firstWhere((e) => _selectedAccountKeys.contains(e.key));
+      label = '${selectedEntry.value.$1.name} - ${selectedEntry.value.$2.name}';
+    } else {
+      label = '${_selectedAccountKeys.length} Accounts';
+    }
+
+    return IntrinsicWidth(
+      child: GestureDetector(
+        onTap: _showMultiSelectDialog,
+        child: Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onPrimary,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.account_balance,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_drop_down, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -262,60 +482,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            IntrinsicWidth(
-                              child: SizedBox(
-                                height: 40,
-                                child: DropdownButtonFormField<String>(
-                                  initialValue: '1',
-                                  dropdownColor: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary,
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimary,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 10,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  onChanged: (String? key) {
-                                    _updateTransactionGroup(key!);
-                                  },
-                                  items: [
-                                    DropdownMenuItem<String>(
-                                      value: '1',
-                                      child: Text(
-                                        'All Accounts',
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                    ..._groupedTransactions.map<
-                                      DropdownMenuItem<String>
-                                    >((
-                                      MapEntry<
-                                        String,
-                                        (Item, Account, List<TransactionEntry>)
-                                      >
-                                      value,
-                                    ) {
-                                      return DropdownMenuItem<String>(
-                                        value: value.key,
-                                        child: Text(
-                                          '${value.value.$1.name} - ${value.value.$2.name}',
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                ),
-                              ),
-                            ),
+                            accountSelector(),
                           ],
                         ),
                         SizedBox(height: 12),
