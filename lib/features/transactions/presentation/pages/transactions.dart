@@ -177,6 +177,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         height: 40,
         child: DropdownButtonFormField<String>(
           initialValue: category,
+          isExpanded: true,
           decoration: InputDecoration(
             filled: true,
             fillColor: Theme.of(context).colorScheme.onPrimary,
@@ -227,6 +228,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         height: 40,
         child: DropdownButtonFormField<String>(
           initialValue: tableCategory,
+          isExpanded: true,
           icon: const Icon(Icons.filter_list, size: 20),
           decoration: InputDecoration(
             filled: true,
@@ -279,11 +281,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Select Accounts',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  const Expanded(
+                    child: Text(
+                      'Select Accounts',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],

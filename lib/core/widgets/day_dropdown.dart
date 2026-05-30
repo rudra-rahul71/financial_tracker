@@ -21,6 +21,7 @@ class _DayDropdownState extends State<DayDropdown> {
         height: 40,
         child: DropdownButtonFormField<int>(
           initialValue: _selectedDays,
+          isExpanded: true,
           decoration: InputDecoration(
             filled: true,
             fillColor: Theme.of(context).colorScheme.onPrimary,

@@ -4,7 +4,9 @@ import 'package:financial_tracker/features/accounts/domain/entities/account.dart
 import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
 import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
 import 'package:financial_tracker/features/accounts/domain/entities/sync_cursor.dart';
+import 'package:financial_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:sqflite/sqflite.dart' show ConflictAlgorithm;
+
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._constructor();
@@ -223,5 +225,48 @@ class DatabaseService {
       for (var doc in querySnapshot.docs)
         doc.id: doc.data()[SyncCursor.columnNextCursor] as String,
     };
+  }
+
+  Future<List<Budget>> getBudgets() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return [];
+
+    final querySnapshot = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection(Budget.tableName)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => Budget.fromMap(doc.data()))
+        .toList();
+  }
+
+  Future<void> saveBudget(Budget budget) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final docRef = _firestore
+        .collection('users')
+        .doc(uid)
+        .collection(Budget.tableName)
+        .doc(budget.id.isEmpty ? null : budget.id);
+
+    final id = budget.id.isEmpty ? docRef.id : budget.id;
+    final updatedBudget = budget.copyWith(id: id);
+
+    await docRef.set(updatedBudget.toMap(), SetOptions(merge: true));
+  }
+
+  Future<void> deleteBudget(String id) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection(Budget.tableName)
+        .doc(id)
+        .delete();
   }
 }
