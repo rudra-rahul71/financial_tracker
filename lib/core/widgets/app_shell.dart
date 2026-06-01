@@ -79,7 +79,7 @@ class _NavigatorScafoldState extends State<NavigatorScafold>
         context.go('/accounts');
         break;
       case 6:
-        context.go('/insights');
+        context.go('/subscriptions');
         break;
       case 7:
         context.go('/profile');
@@ -110,8 +110,8 @@ class _NavigatorScafoldState extends State<NavigatorScafold>
       label: Text('Accounts'),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.lightbulb),
-      label: Text('Insights'),
+      icon: Icon(Icons.subscriptions),
+      label: Text('Subscriptions'),
     ),
     NavigationRailDestination(
       icon: Icon(Icons.account_circle),

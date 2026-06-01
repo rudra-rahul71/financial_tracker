@@ -5,7 +5,7 @@ import 'package:financial_tracker/features/auth/presentation/pages/sign_in.dart'
 import 'package:financial_tracker/features/auth/presentation/pages/verify_email.dart';
 import 'package:financial_tracker/features/budgets/presentation/pages/budgets.dart';
 import 'package:financial_tracker/features/home/presentation/pages/home.dart';
-import 'package:financial_tracker/features/insights/presentation/pages/insights.dart';
+import 'package:financial_tracker/features/subscriptions/presentation/pages/subscriptions.dart';
 import 'package:financial_tracker/features/profile/presentation/pages/profile.dart';
 import 'package:financial_tracker/features/transactions/presentation/pages/transactions.dart';
 import 'package:financial_tracker/core/network/api_service.dart';
@@ -148,9 +148,9 @@ final GoRouter _router = GoRouter(
           },
         ),
         GoRoute(
-          path: '/insights',
+          path: '/subscriptions',
           builder: (BuildContext context, GoRouterState state) {
-            return InsightsPage();
+            return SubscriptionsPage();
           },
         ),
         GoRoute(

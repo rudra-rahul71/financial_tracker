@@ -187,11 +187,45 @@ class ApiService {
         }
       }
     } catch (e) {
-      print('Exception in initPlaidIntegration: $e');
+      debugPrint('Exception in initPlaidIntegration: $e');
       if (context.mounted) {
         SnackbarService(
           context,
         ).showErrorSnackbar(message: 'Failed to initiate connection process!');
+      }
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> getRecurringTransactions(BuildContext context) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return null;
+      final idToken = await user.getIdToken();
+
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      };
+
+      final url = Uri.parse('$host/recurring');
+
+      final response = await http.get(url, headers: headers);
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      } else {
+        if (context.mounted) {
+          SnackbarService(context).showErrorSnackbar(
+            message: 'Failed to fetch recurring transactions!',
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Exception in getRecurringTransactions: $e');
+      if (context.mounted) {
+        SnackbarService(context).showErrorSnackbar(
+          message: 'Error fetching subscription data!',
+        );
       }
     }
     return null;
