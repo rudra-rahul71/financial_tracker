@@ -9,6 +9,7 @@ import 'package:financial_tracker/features/transactions/domain/entities/transact
 import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:financial_tracker/core/utils/snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:financial_tracker/core/widgets/date_filter_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:plaid_flutter/plaid_flutter.dart';
@@ -27,11 +28,14 @@ class ApiService {
   StreamSubscription<LinkSuccess>? _onSuccessSubscription;
   StreamSubscription<LinkExit>? _onExitSubscription;
 
-  static int _interval = 30;
-  static int get interval => _interval;
-  static void setMyVariable(int newValue) {
-    _interval = newValue;
+  static DateFilter _currentFilter = const DateFilter.month(0);
+  static DateFilter get currentFilter => _currentFilter;
+  static void setDateFilter(DateFilter newFilter) {
+    _currentFilter = newFilter;
   }
+
+  // Kept for backward compatibility or charts scaling
+  static int get interval => _currentFilter.type == DateFilterType.rollingDays ? _currentFilter.value : 30;
 
   Future<void> searchAccounts(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;

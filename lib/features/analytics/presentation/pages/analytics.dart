@@ -1,7 +1,7 @@
 import 'package:financial_tracker/core/widgets/basic_card.dart';
 import 'package:financial_tracker/core/charts/category_spending.dart';
 import 'package:financial_tracker/core/charts/distribution_pie.dart';
-import 'package:financial_tracker/core/widgets/day_dropdown.dart';
+import 'package:financial_tracker/core/widgets/date_filter_dropdown.dart';
 import 'package:financial_tracker/core/widgets/page_header.dart';
 import 'package:financial_tracker/main.dart';
 import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
@@ -23,7 +23,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   bool _loading = false;
   bool _showIncome = false;
 
-  Future<void> _updateDays(int days) async {
+  Future<void> _updateDateFilter(DateFilter filter) async {
+    ApiService.setDateFilter(filter);
     setState(() {
       _loading = true;
     });
@@ -44,19 +45,19 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     try {
       final Map<String, double> groupedTransactions = {};
 
-      DateTime now = DateTime.now();
-      DateTime threshold = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: ApiService.interval));
+      final dateRange = ApiService.currentFilter.getDateTimeRange();
+      final threshold = dateRange.start;
 
       List<TransactionEntry> allTransactions = await _databaseService
           .getTransactions(since: threshold);
 
       if (!mounted) return;
 
-      List<TransactionEntry> transactions = allTransactions;
+      List<TransactionEntry> transactions = allTransactions.where((t) {
+        final tDate = DateTime.tryParse(t.date);
+        if (tDate == null) return false;
+        return tDate.isBefore(dateRange.end.add(const Duration(seconds: 1)));
+      }).toList();
 
       for (final transaction in transactions) {
         if (transaction.isHidden) continue;
@@ -140,7 +141,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     });
                   },
                 ),
-                DayDropdown(daysUpdated: _updateDays),
+                DateFilterDropdown(
+                  initialFilter: ApiService.currentFilter,
+                  filterUpdated: _updateDateFilter,
+                ),
               ],
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:financial_tracker/features/transactions/domain/entities/transact
 import 'package:financial_tracker/core/network/api_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class SpendingTracker extends StatefulWidget {
   final List<TransactionEntry> transactions;
@@ -58,6 +59,9 @@ class _SpendingTrackerState extends State<SpendingTracker> {
 
   @override
   Widget build(BuildContext context) {
+    final dateRange = ApiService.currentFilter.getDateTimeRange();
+    final int displayDays = dateRange.end.difference(dateRange.start).inDays;
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onPrimary,
@@ -92,7 +96,7 @@ class _SpendingTrackerState extends State<SpendingTracker> {
                 sideTitles: SideTitles(
                   showTitles: true,
                   interval:
-                      777700000000 * (ApiService.interval.toDouble() / 30),
+                      86400000000.0 * math.max(1, (displayDays / 4).ceil()),
                   getTitlesWidget: (value, meta) {
                     final int micros = value.toInt();
                     final DateTime date = DateTime.fromMicrosecondsSinceEpoch(

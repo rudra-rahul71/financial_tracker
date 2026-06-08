@@ -19,6 +19,11 @@ class TransactionHistory extends StatefulWidget {
 class _TransactionHistoryState extends State<TransactionHistory> {
   @override
   Widget build(BuildContext context) {
+    final dateRange = ApiService.currentFilter.getDateTimeRange();
+    final DateTime rangeStart = DateTime(dateRange.start.year, dateRange.start.month, dateRange.start.day);
+    final DateTime rangeEnd = DateTime(dateRange.end.year, dateRange.end.month, dateRange.end.day);
+    final int displayDays = rangeEnd.difference(rangeStart).inDays;
+
     List<(Item, Account, List<TransactionEntry>, Set<String>, bool)> list = [];
     DateTime now = DateTime.now();
     double maxVal = -double.maxFinite;
@@ -49,28 +54,37 @@ class _TransactionHistoryState extends State<TransactionHistory> {
       DateTime today = DateTime(now.year, now.month, now.day);
       double balanceTracker = currentBalance;
 
-      for (int i = 0; i <= ApiService.interval; i++) {
+      // Calculate total days to walk back from today to rangeStart
+      final int daysToWalkBack = today.isAfter(rangeStart)
+          ? today.difference(rangeStart).inDays
+          : 0;
+
+      for (int i = 0; i <= daysToWalkBack; i++) {
         DateTime currentDay = today.subtract(Duration(days: i));
         String dateString =
             '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
 
         double chartBalance = isCreditCard ? balanceTracker.abs() : balanceTracker;
 
-        transactionList.add(
-          TransactionEntry(
-            id: '',
-            accountId: '',
-            name: '',
-            date: dateString,
-            type: '',
-            subtype: '',
-            amount: chartBalance,
-            isPending: false,
-          ),
-        );
+        final bool inRange = !currentDay.isBefore(rangeStart) && !currentDay.isAfter(rangeEnd);
 
-        maxVal = math.max(maxVal, chartBalance);
-        minVal = math.min(minVal, chartBalance);
+        if (inRange) {
+          transactionList.add(
+            TransactionEntry(
+              id: '',
+              accountId: '',
+              name: '',
+              date: dateString,
+              type: '',
+              subtype: '',
+              amount: chartBalance,
+              isPending: false,
+            ),
+          );
+
+          maxVal = math.max(maxVal, chartBalance);
+          minVal = math.min(minVal, chartBalance);
+        }
 
         if (dailyTransactions.containsKey(dateString)) {
           balanceTracker += dailyTransactions[dateString]!;
@@ -137,7 +151,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                   reservedSize: 40,
                   interval:
                       86400000000.0 *
-                      math.max(1, (ApiService.interval / 4).ceil()),
+                      math.max(1, (displayDays / 4).ceil()),
                   getTitlesWidget: (value, meta) {
                     final int micros = value.toInt();
                     final DateTime date = DateTime.fromMicrosecondsSinceEpoch(

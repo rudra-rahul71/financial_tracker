@@ -1,5 +1,7 @@
 import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:financial_tracker/core/widgets/page_header.dart';
+import 'package:financial_tracker/core/network/api_service.dart';
+import 'package:financial_tracker/core/widgets/date_filter_dropdown.dart';
 import 'package:financial_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:financial_tracker/features/transactions/domain/entities/transaction.dart';
 import 'package:financial_tracker/core/utils/formatters.dart';
@@ -18,7 +20,6 @@ class _BudgetsPageState extends State<BudgetsPage> {
   List<Budget> _budgets = [];
   List<TransactionEntry> _transactions = [];
   bool _loading = true;
-  int _selectedMonthOffset = 0;
 
   // Onboarding Form Controller/State
   String? _onboardingCategory;
@@ -26,20 +27,6 @@ class _BudgetsPageState extends State<BudgetsPage> {
   final TextEditingController _onboardingLimitController = TextEditingController();
   bool _onboardingIsCustom = false;
   bool _onboardingLimitFocused = false;
-
-  String _getMonthName(int offset) {
-    const List<String> monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    final date = DateTime(DateTime.now().year, DateTime.now().month - offset, 1);
-    return monthNames[date.month - 1];
-  }
-
-  String _getMonthNameWithYear(int offset) {
-    final date = DateTime(DateTime.now().year, DateTime.now().month - offset, 1);
-    return '${_getMonthName(offset)} ${date.year}';
-  }
 
   @override
   void initState() {
@@ -62,27 +49,17 @@ class _BudgetsPageState extends State<BudgetsPage> {
     try {
       final budgets = await _databaseService.getBudgets();
       
-      // Calculate start and end date for the selected calendar month
-      DateTime now = DateTime.now();
-      DateTime startDate = DateTime(
-        now.year,
-        now.month - _selectedMonthOffset,
-        1,
-      );
-      DateTime nextMonthStartDate = DateTime(
-        now.year,
-        now.month - _selectedMonthOffset + 1,
-        1,
-      );
+      final dateRange = ApiService.currentFilter.getDateTimeRange();
+      final startDate = dateRange.start;
       
       // Load transactions since the start of the selected month
       final transactions = await _databaseService.getTransactions(since: startDate);
 
-      // Filter client-side to only keep transactions that occurred within the selected month
+      // Filter client-side to only keep transactions that occurred within the selected range
       final filteredTransactions = transactions.where((t) {
         final tDate = DateTime.tryParse(t.date);
         if (tDate == null) return false;
-        return tDate.isBefore(nextMonthStartDate);
+        return tDate.isBefore(dateRange.end.add(const Duration(seconds: 1)));
       }).toList();
 
       if (!mounted) return;
@@ -460,61 +437,12 @@ class _BudgetsPageState extends State<BudgetsPage> {
     );
   }
 
-  Widget _buildMonthDropdown() {
-    String getDropdownLabel(int offset) {
-      final now = DateTime.now();
-      final date = DateTime(now.year, now.month - offset, 1);
-      const List<String> monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
-      final monthStr = monthNames[date.month - 1];
-      final yearStr = date.year.toString();
-      
-      if (offset == 0) return '$monthStr $yearStr (This Month)';
-      if (offset == 1) return '$monthStr $yearStr (Last Month)';
-      return '$monthStr $yearStr';
-    }
-
-    return IntrinsicWidth(
-      child: SizedBox(
-        height: 40,
-        child: DropdownButtonFormField<int>(
-          initialValue: _selectedMonthOffset,
-          isExpanded: false,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.onPrimary,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 10,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              borderSide: BorderSide.none,
-            ),
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedMonthOffset = newValue;
-              });
-              _loadData();
-            }
-          },
-          items: [0, 1, 2].map<DropdownMenuItem<int>>((int offset) {
-            return DropdownMenuItem<int>(
-              value: offset,
-              child: Text(
-                getDropdownLabel(offset),
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-            );
-          }).toList(),
-          dropdownColor: Theme.of(context).colorScheme.onPrimary,
-        ),
-      ),
-    );
+  Future<void> _updateDateFilter(DateFilter filter) async {
+    ApiService.setDateFilter(filter);
+    setState(() {
+      _loading = true;
+    });
+    await _loadData();
   }
 
   Widget _buildOnboardingFlow() {
@@ -866,7 +794,7 @@ class _BudgetsPageState extends State<BudgetsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Spending Limits (${_getMonthName(_selectedMonthOffset)})',
+                    'Spending Limits (${ApiService.currentFilter.getLabel()})',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
@@ -1039,7 +967,7 @@ class _BudgetsPageState extends State<BudgetsPage> {
             header: 'Budgets',
             sub: showOnboarding
                 ? 'Onboarding setup flow'
-                : 'Set and track your category spending limits for ${_getMonthNameWithYear(_selectedMonthOffset)}',
+                : 'Set and track your category spending limits for ${ApiService.currentFilter.getLabel()}',
             actions: showOnboarding
                 ? null
                 : [
@@ -1062,7 +990,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
                         ),
                       ),
                     ),
-                    _buildMonthDropdown(),
+                    DateFilterDropdown(
+                      initialFilter: ApiService.currentFilter,
+                      filterUpdated: _updateDateFilter,
+                    ),
                   ],
           ),
           Expanded(

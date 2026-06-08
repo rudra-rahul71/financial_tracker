@@ -2,7 +2,7 @@ import 'package:financial_tracker/core/widgets/basic_card.dart';
 import 'package:financial_tracker/core/charts/spending_tracker.dart';
 import 'package:financial_tracker/core/charts/transaction_history.dart';
 import 'package:financial_tracker/core/charts/transaction_table.dart';
-import 'package:financial_tracker/core/widgets/day_dropdown.dart';
+import 'package:financial_tracker/core/widgets/date_filter_dropdown.dart';
 import 'package:financial_tracker/core/widgets/page_header.dart';
 import 'package:financial_tracker/main.dart';
 import 'package:financial_tracker/features/accounts/domain/entities/account.dart';
@@ -61,7 +61,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
         : 0;
   }
 
-  Future<void> _updateDays(int days) async {
+  Future<void> _updateDateFilter(DateFilter filter) async {
+    ApiService.setDateFilter(filter);
     setState(() {
       _loading = true;
     });
@@ -111,12 +112,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       final Map<String, (Item, Account, List<TransactionEntry>)>
       groupedTransactions = {};
 
-      DateTime now = DateTime.now();
-      DateTime threshold = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: ApiService.interval));
+      final dateRange = ApiService.currentFilter.getDateTimeRange();
+      final threshold = dateRange.start;
 
       // Fetch all required data in parallel once
       final results = await Future.wait([
@@ -135,7 +132,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
       final Map<String, Account> accountMap = {for (var a in accounts) a.id: a};
       final Map<String, Item> itemMap = {for (var i in items) i.id: i};
 
-      transactions = allTransactions;
+      transactions = allTransactions.where((t) {
+        final tDate = DateTime.tryParse(t.date);
+        if (tDate == null) return false;
+        return tDate.isBefore(dateRange.end.add(const Duration(seconds: 1)));
+      }).toList();
 
       for (final transaction in transactions) {
         if (transaction.accountId.isEmpty) {
@@ -493,7 +494,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            DayDropdown(daysUpdated: _updateDays),
+                            DateFilterDropdown(
+                              initialFilter: ApiService.currentFilter,
+                              filterUpdated: _updateDateFilter,
+                            ),
                             const SizedBox(width: 12),
                             accountSelector(),
                           ],
