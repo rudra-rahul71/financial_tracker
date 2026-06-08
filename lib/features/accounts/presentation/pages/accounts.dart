@@ -99,9 +99,11 @@ class _AccountsPageState extends State<AccountsPage> {
       }
     }
 
-    setState(() {
-      _loading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _updateAccounts() async {
@@ -115,6 +117,8 @@ class _AccountsPageState extends State<AccountsPage> {
         _databaseService.getAccounts(),
         _databaseService.getItems(),
       ]);
+
+      if (!mounted) return;
 
       List<Account> accounts = results[0] as List<Account>;
       List<Item> items = results[1] as List<Item>;
@@ -151,9 +155,11 @@ class _AccountsPageState extends State<AccountsPage> {
         _connections = groupedAccounts.entries;
       });
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -172,29 +178,32 @@ class _AccountsPageState extends State<AccountsPage> {
         // crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PageHeader(
+            showBackButton: true,
             header: 'Accounts',
             sub: 'Manage your financial accounts',
-            action: ElevatedButton.icon(
-              onPressed: () {
-                _showAddAccountDialog(context);
-              },
-              icon: const Icon(Icons.add, size: 20),
-              label: const Text(
-                'Add Account',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                foregroundColor: Theme.of(context).colorScheme.inverseSurface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+            actions: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  _showAddAccountDialog(context);
+                },
+                icon: const Icon(Icons.add, size: 20),
+                label: const Text(
+                  'Add Account',
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                  foregroundColor: Theme.of(context).colorScheme.inverseSurface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
           Expanded(
             child: Center(

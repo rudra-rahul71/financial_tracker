@@ -18,6 +18,7 @@ class _BudgetsPageState extends State<BudgetsPage> {
   List<Budget> _budgets = [];
   List<TransactionEntry> _transactions = [];
   bool _loading = true;
+  int _selectedMonthOffset = 0;
 
   // Onboarding Form Controller/State
   String? _onboardingCategory;
@@ -25,6 +26,20 @@ class _BudgetsPageState extends State<BudgetsPage> {
   final TextEditingController _onboardingLimitController = TextEditingController();
   bool _onboardingIsCustom = false;
   bool _onboardingLimitFocused = false;
+
+  String _getMonthName(int offset) {
+    const List<String> monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    final date = DateTime(DateTime.now().year, DateTime.now().month - offset, 1);
+    return monthNames[date.month - 1];
+  }
+
+  String _getMonthNameWithYear(int offset) {
+    final date = DateTime(DateTime.now().year, DateTime.now().month - offset, 1);
+    return '${_getMonthName(offset)} ${date.year}';
+  }
 
   @override
   void initState() {
@@ -47,26 +62,40 @@ class _BudgetsPageState extends State<BudgetsPage> {
     try {
       final budgets = await _databaseService.getBudgets();
       
-      // Load recent transactions to calculate budget spending
+      // Calculate start and end date for the selected calendar month
       DateTime now = DateTime.now();
-      DateTime threshold = DateTime(
+      DateTime startDate = DateTime(
         now.year,
-        now.month,
-        now.day,
-      ).subtract(const Duration(days: 30));
+        now.month - _selectedMonthOffset,
+        1,
+      );
+      DateTime nextMonthStartDate = DateTime(
+        now.year,
+        now.month - _selectedMonthOffset + 1,
+        1,
+      );
       
-      final transactions = await _databaseService.getTransactions(since: threshold);
+      // Load transactions since the start of the selected month
+      final transactions = await _databaseService.getTransactions(since: startDate);
 
+      // Filter client-side to only keep transactions that occurred within the selected month
+      final filteredTransactions = transactions.where((t) {
+        final tDate = DateTime.tryParse(t.date);
+        if (tDate == null) return false;
+        return tDate.isBefore(nextMonthStartDate);
+      }).toList();
+
+      if (!mounted) return;
       setState(() {
         _budgets = budgets;
-        _transactions = transactions;
+        _transactions = filteredTransactions;
         _loading = false;
       });
     } catch (e) {
-      setState(() {
-        _loading = false;
-      });
       if (mounted) {
+        setState(() {
+          _loading = false;
+        });
         SnackbarService(context).showErrorSnackbar(
           message: 'Failed to load budgets data: $e',
         );
@@ -431,6 +460,63 @@ class _BudgetsPageState extends State<BudgetsPage> {
     );
   }
 
+  Widget _buildMonthDropdown() {
+    String getDropdownLabel(int offset) {
+      final now = DateTime.now();
+      final date = DateTime(now.year, now.month - offset, 1);
+      const List<String> monthNames = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      final monthStr = monthNames[date.month - 1];
+      final yearStr = date.year.toString();
+      
+      if (offset == 0) return '$monthStr $yearStr (This Month)';
+      if (offset == 1) return '$monthStr $yearStr (Last Month)';
+      return '$monthStr $yearStr';
+    }
+
+    return IntrinsicWidth(
+      child: SizedBox(
+        height: 40,
+        child: DropdownButtonFormField<int>(
+          initialValue: _selectedMonthOffset,
+          isExpanded: false,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.onPrimary,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 10,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onChanged: (int? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _selectedMonthOffset = newValue;
+              });
+              _loadData();
+            }
+          },
+          items: [0, 1, 2].map<DropdownMenuItem<int>>((int offset) {
+            return DropdownMenuItem<int>(
+              value: offset,
+              child: Text(
+                getDropdownLabel(offset),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            );
+          }).toList(),
+          dropdownColor: Theme.of(context).colorScheme.onPrimary,
+        ),
+      ),
+    );
+  }
+
   Widget _buildOnboardingFlow() {
     final availableCategories = _getAvailableCategories();
     if (_onboardingCategory == null && availableCategories.isNotEmpty) {
@@ -779,9 +865,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Spending Limits',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    'Spending Limits (${_getMonthName(_selectedMonthOffset)})',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   ...budgetDetails.map((detail) {
@@ -949,31 +1035,35 @@ class _BudgetsPageState extends State<BudgetsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PageHeader(
+            showBackButton: true,
             header: 'Budgets',
             sub: showOnboarding
                 ? 'Onboarding setup flow'
-                : 'Set and track your monthly category spending limits',
-            action: showOnboarding
+                : 'Set and track your category spending limits for ${_getMonthNameWithYear(_selectedMonthOffset)}',
+            actions: showOnboarding
                 ? null
-                : ElevatedButton.icon(
-                    onPressed: _showCreateDialog,
-                    icon: const Icon(Icons.add, size: 20),
-                    label: const Text(
-                      'Create Budget',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                      foregroundColor: Theme.of(context).colorScheme.inverseSurface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                : [
+                    ElevatedButton.icon(
+                      onPressed: _showCreateDialog,
+                      icon: const Icon(Icons.add, size: 20),
+                      label: const Text(
+                        'Create Budget',
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(context).colorScheme.inverseSurface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                       ),
                     ),
-                  ),
+                    _buildMonthDropdown(),
+                  ],
           ),
           Expanded(
             child: _loading

@@ -29,11 +29,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     });
 
     await _apiService.searchAccounts(context);
+    if (!mounted) return;
     await _updateTransactions();
   }
 
   Future<void> _updateTransactions({bool showLoader = true}) async {
     if (showLoader) {
+      if (!mounted) return;
       setState(() {
         _loading = true;
       });
@@ -51,6 +53,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
       List<TransactionEntry> allTransactions = await _databaseService
           .getTransactions(since: threshold);
+
+      if (!mounted) return;
 
       List<TransactionEntry> transactions = allTransactions;
 
@@ -78,9 +82,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         return b.value.compareTo(a.value);
       });
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -98,34 +104,44 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       child: Column(
         children: <Widget>[
           PageHeader(
+            showProfileButton: true,
+            wrapAction: false,
             header: 'Analytics',
             sub: _showIncome
                 ? 'Deep insights into your income patterns'
                 : 'Deep insights into your spending patterns',
-            action: DayDropdown(daysUpdated: _updateDays),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: SegmentedButton<bool>(
-              segments: const <ButtonSegment<bool>>[
-                ButtonSegment<bool>(
-                  value: false,
-                  label: Text('Spending'),
-                  icon: Icon(Icons.arrow_downward),
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12.0,
+              runSpacing: 12.0,
+              children: [
+                SegmentedButton<bool>(
+                  segments: const <ButtonSegment<bool>>[
+                    ButtonSegment<bool>(
+                      value: false,
+                      label: Text('Spending'),
+                      icon: Icon(Icons.arrow_downward),
+                    ),
+                    ButtonSegment<bool>(
+                      value: true,
+                      label: Text('Income'),
+                      icon: Icon(Icons.arrow_upward),
+                    ),
+                  ],
+                  selected: <bool>{_showIncome},
+                  onSelectionChanged: (Set<bool> newSelection) {
+                    setState(() {
+                      _showIncome = newSelection.first;
+                      _updateTransactions();
+                    });
+                  },
                 ),
-                ButtonSegment<bool>(
-                  value: true,
-                  label: Text('Income'),
-                  icon: Icon(Icons.arrow_upward),
-                ),
+                DayDropdown(daysUpdated: _updateDays),
               ],
-              selected: <bool>{_showIncome},
-              onSelectionChanged: (Set<bool> newSelection) {
-                setState(() {
-                  _showIncome = newSelection.first;
-                  _updateTransactions();
-                });
-              },
             ),
           ),
           Expanded(

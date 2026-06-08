@@ -67,6 +67,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
 
     await _apiService.searchAccounts(context);
+    if (!mounted) return;
     await _updateTransactions();
   }
 
@@ -100,6 +101,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Future<void> _updateTransactions({bool showLoader = true}) async {
     if (showLoader) {
+      if (!mounted) return;
       setState(() {
         _loading = true;
       });
@@ -122,6 +124,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
         _databaseService.getAccounts(),
         _databaseService.getItems(),
       ]);
+
+      if (!mounted) return;
 
       List<TransactionEntry> allTransactions = results[0] as List<TransactionEntry>;
       List<Account> accounts = results[1] as List<Account>;
@@ -164,9 +168,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
       });
     } finally {
       if (showLoader) {
-        setState(() {
-          _loading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _loading = false;
+          });
+        }
       }
     }
   }
@@ -471,9 +477,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PageHeader(
+            showProfileButton: true,
+            wrapAction: false,
             header: 'Transactions',
             sub: 'Track and manage all your transactions',
-            action: DayDropdown(daysUpdated: _updateDays),
           ),
           Expanded(
             child: _loading
@@ -486,6 +493,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
+                            DayDropdown(daysUpdated: _updateDays),
+                            const SizedBox(width: 12),
                             accountSelector(),
                           ],
                         ),

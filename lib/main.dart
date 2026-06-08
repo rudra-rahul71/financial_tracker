@@ -8,6 +8,7 @@ import 'package:financial_tracker/features/home/presentation/pages/home.dart';
 import 'package:financial_tracker/features/subscriptions/presentation/pages/subscriptions.dart';
 import 'package:financial_tracker/features/profile/presentation/pages/profile.dart';
 import 'package:financial_tracker/features/transactions/presentation/pages/transactions.dart';
+import 'package:financial_tracker/features/vault/presentation/pages/vault.dart';
 import 'package:financial_tracker/core/network/api_service.dart';
 import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:financial_tracker/core/widgets/app_shell.dart';
@@ -95,7 +96,10 @@ final GoRouter _router = GoRouter(
         if (state.fullPath == '/' || state.fullPath!.startsWith('/auth')) {
           return child;
         }
-        return NavigatorScafold(child: child);
+        return NavigatorScafold(
+          currentPath: state.fullPath ?? '/home',
+          child: child,
+        );
       },
 
       routes: [
@@ -154,9 +158,21 @@ final GoRouter _router = GoRouter(
           },
         ),
         GoRoute(
+          path: '/vault',
+          builder: (BuildContext context, GoRouterState state) {
+            return const VaultPage();
+          },
+        ),
+        GoRoute(
           path: '/profile',
           builder: (BuildContext context, GoRouterState state) {
-            return ProfilePage();
+            return const ProfilePage();
+          },
+        ),
+        GoRoute(
+          path: '/profile/settings',
+          builder: (BuildContext context, GoRouterState state) {
+            return const FirebaseProfilePage();
           },
         ),
       ],

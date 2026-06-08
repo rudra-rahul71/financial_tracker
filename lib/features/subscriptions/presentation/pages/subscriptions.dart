@@ -38,12 +38,14 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
   }
 
   Future<void> _fetchData() async {
+    if (!mounted) return;
     setState(() {
       _loading = true;
     });
 
     try {
       final data = await _apiService.getRecurringTransactions(context);
+      if (!mounted) return;
       if (data != null) {
         _inflows = data['inflow_streams'] ?? [];
         _outflows = data['outflow_streams'] ?? [];
@@ -52,9 +54,11 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
     } catch (e) {
       debugPrint('Error fetching recurring transactions: $e');
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -112,6 +116,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
       }
     }
 
+    if (!mounted) return;
     setState(() {
       _totalMonthlyOutflow = monthlyTotal;
       _activeOutflowsCount = activeCount;
@@ -580,40 +585,16 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              _getFrequencyLabel(freqLabel),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            if (isActive &&
-                                nextDateStr != null &&
-                                nextDateStr.isNotEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6.0,
-                                ),
-                                child: Text(
-                                  '•',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: theme.colorScheme.onSurfaceVariant
-                                        .withAlpha(153),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                renewalText,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ],
+                        Text(
+                          isActive && nextDateStr != null && nextDateStr.isNotEmpty
+                              ? '${_getFrequencyLabel(freqLabel)} • $renewalText'
+                              : _getFrequencyLabel(freqLabel),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -674,14 +655,18 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
           child: Column(
             children: [
               PageHeader(
+                showBackButton: true,
+                wrapAction: false,
                 header: 'Subscriptions & Bills',
                 sub:
                     'Track monthly recurring outflows, subscriptions, and inflows.',
-                action: IconButton(
-                  onPressed: _fetchData,
-                  icon: const Icon(Icons.refresh),
-                  tooltip: 'Sync Subscriptions',
-                ),
+                actions: [
+                  IconButton(
+                    onPressed: _fetchData,
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Sync Subscriptions',
+                  ),
+                ],
               ),
               if (_loading)
                 const Expanded(
