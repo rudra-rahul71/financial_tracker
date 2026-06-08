@@ -18,23 +18,23 @@ class NavigatorScafold extends StatefulWidget {
 class _NavigatorScafoldState extends State<NavigatorScafold> {
   bool _extendRail = false;
 
-  int get _selectedBottomIndex {
+  int? get _selectedBottomIndex {
     final path = widget.currentPath;
     if (path.startsWith('/home')) return 0;
     if (path.startsWith('/transactions')) return 1;
     if (path.startsWith('/analytics')) return 2;
     if (path.startsWith('/vault') ||
         path.startsWith('/budgets') ||
-        path.startsWith('/accounts') ||
-        path.startsWith('/subscriptions') ||
-        path.startsWith('/profile')) {
+        path.startsWith('/subscriptions')) {
       return 3;
     }
-    return 0; // fallback to Home
+    return null;
   }
 
-  int get _selectedRailIndex {
-    return _selectedBottomIndex + 1;
+  int? get _selectedRailIndex {
+    final bottomIndex = _selectedBottomIndex;
+    if (bottomIndex == null) return null;
+    return bottomIndex + 1;
   }
 
   void _navigate(int index, BuildContext context, {required bool isRail}) {
