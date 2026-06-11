@@ -4,6 +4,7 @@ class TransactionEntry {
 
   bool isPending;
   bool isHidden = false;
+  String? classification;
 
   static const String tableName = 'transactions';
   static const String columnId = 'id';
@@ -24,7 +25,19 @@ class TransactionEntry {
     required this.subtype,
     required this.amount,
     required this.isPending,
+    this.classification,
   });
+
+  String get billingClassification {
+    if (classification != null && classification!.isNotEmpty) {
+      return classification!;
+    }
+    // Default logic:
+    if (type == 'RENT_AND_UTILITIES' || type == 'LOAN_PAYMENTS') {
+      return 'fixed';
+    }
+    return 'variable';
+  }
 
   factory TransactionEntry.fromJson(Map<String, dynamic> json) {
     return TransactionEntry(
@@ -36,6 +49,7 @@ class TransactionEntry {
       subtype: json['personal_finance_category']?['detailed'] ?? '',
       amount: (json['amount'] as num).toDouble(),
       isPending: json['pending'] == true,
+      classification: json['classification'] as String?,
     );
   }
 
@@ -57,6 +71,7 @@ class TransactionEntry {
       columnSubtype: subtype,
       columnAmount: amount,
       columnIsPending: isPending ? 1 : 0,
+      if (classification != null) 'classification': classification,
     };
   }
 
@@ -72,6 +87,7 @@ class TransactionEntry {
       isPending: map[columnIsPending] is bool
           ? map[columnIsPending] as bool
           : (map[columnIsPending] as int) == 1,
+      classification: map['classification'] as String?,
     );
     if (map['customCategory'] != null) {
       t.type = map['customCategory'] as String;
@@ -92,6 +108,7 @@ class TransactionEntry {
       subtype: subtype,
       amount: amount,
       isPending: isPending,
+      classification: classification,
     );
   }
 }

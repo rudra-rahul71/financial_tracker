@@ -55,7 +55,7 @@ class DatabaseService {
         .delete();
   }
 
-  Future<void> saveTransactionPreference(String id, {String? category, bool? isHidden}) async {
+  Future<void> saveTransactionPreference(String id, {String? category, bool? isHidden, String? classification}) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       throw Exception('User is not logged in');
@@ -70,6 +70,7 @@ class DatabaseService {
     await docRef.set({
       if (category != null) 'customCategory': category,
       if (isHidden != null) 'isHidden': isHidden,
+      if (classification != null) 'classification': classification,
     }, SetOptions(merge: true));
   }
 

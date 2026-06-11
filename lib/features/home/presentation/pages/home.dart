@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
   double _lastMonthSpending = 0.0;
   double _twoMonthsAgoSpending = 0.0;
   double _spendingPercentChange = 0.0;
+  double _projectedThisMonthSpending = 0.0;
 
   @override
   void initState() {
@@ -55,6 +56,11 @@ class _HomePageState extends State<HomePage> {
       double lastMonthSum = 0.0;
       double twoMonthsAgoSum = 0.0;
 
+      // Variables to store current month's sub-categories for projection:
+      double thisMonthFixed = 0.0;
+      double thisMonthVariable = 0.0;
+      double thisMonthOneOff = 0.0;
+
       for (final tx in allTransactions) {
         if (tx.isHidden) continue;
         if (tx.amount <= 0) continue; // spending is amount > 0
@@ -66,6 +72,16 @@ class _HomePageState extends State<HomePage> {
           // Compare this month up to the current day of the month
           if (tDate.day <= currentDay) {
             thisMonthSum += tx.amount;
+
+            // Separate for projection
+            final classification = tx.billingClassification;
+            if (classification == 'fixed') {
+              thisMonthFixed += tx.amount;
+            } else if (classification == 'one_off') {
+              thisMonthOneOff += tx.amount;
+            } else {
+              thisMonthVariable += tx.amount;
+            }
           }
         } else if (tDate.year == lastMonthYear && tDate.month == lastMonth) {
           // Compare last month up to the same day of the month
@@ -84,6 +100,13 @@ class _HomePageState extends State<HomePage> {
       _lastMonthSpending = lastMonthSum;
       _twoMonthsAgoSpending = twoMonthsAgoSum;
 
+      // Calculate Projected EOM spending using the hybrid model:
+      final totalDaysInMonth = DateTime(currentYear, currentMonth + 1, 0).day;
+      final double projectedVariable = currentDay > 0
+          ? (thisMonthVariable / currentDay) * totalDaysInMonth
+          : 0.0;
+      _projectedThisMonthSpending = thisMonthFixed + thisMonthOneOff + projectedVariable;
+
       if (lastMonthSum > 0) {
         _spendingPercentChange = ((thisMonthSum - lastMonthSum) / lastMonthSum) * 100;
       } else {
@@ -98,6 +121,106 @@ class _HomePageState extends State<HomePage> {
         });
       }
     }
+  }
+
+  void _showProjectionInfoDialog(BuildContext context, ThemeData theme) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: theme.colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.insights_rounded,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Spending Calculations',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'This card compares your spending month-over-month and projects your end-of-month (EOM) total.',
+                  style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
+                ),
+                const SizedBox(height: 16),
+                _buildInfoDetail(
+                  title: '📅 Month-to-Date (MTD)',
+                  description: 'Compares your actual spending from day 1 up to today against previous months for the exact same date range. This ensures a fair comparison mid-month.',
+                  theme: theme,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoDetail(
+                  title: '📈 Projected EOM',
+                  description: 'Estimated total spending by the end of the month. To prevent skewing, it uses a hybrid calculation:\n\n'
+                      'Formula:\n'
+                      'Projected = Fixed + One-Off + ((Variable / Current Day) * Days in Month)\n\n'
+                      '• 🔄 Fixed Bills (Rent, Utilities) & ⚡ One-Off purchases are added flat (no run-rate scaling).\n'
+                      '• 📈 Variable Spending (Dining, Shopping) is projected linearly based on your current daily spending pace.',
+                  theme: theme,
+                ),
+                const SizedBox(height: 12),
+                _buildInfoDetail(
+                  title: '👁️ Hidden Transactions',
+                  description: 'Any transaction marked as "Hidden from Analytics" is excluded from all counts and will not affect the actual or projected EOM totals.',
+                  theme: theme,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoDetail({
+    required String title,
+    required String description,
+    required ThemeData theme,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          description,
+          style: TextStyle(
+            fontSize: 12,
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildSpendingInsightCard(ThemeData theme) {
@@ -149,20 +272,31 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  Icons.insights_rounded,
-                  color: theme.colorScheme.primary,
-                  size: 20,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.insights_rounded,
+                      color: theme.colorScheme.primary,
+                      size: 20,
                 ),
-                const SizedBox(width: 8),
-                const Text(
-                  'Spending Insight',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Spending Insight',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.info_outline_rounded, size: 18, color: Colors.grey),
+                  onPressed: () => _showProjectionInfoDialog(context, theme),
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
                 ),
               ],
             ),
@@ -172,29 +306,53 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '\$${_thisMonthSpending.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '\$${_thisMonthSpending.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      hasLastMonth
-                          ? 'vs. \$${_lastMonthSpending.toStringAsFixed(2)} same period last month'
-                          : 'No spending recorded last month',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurfaceVariant,
+                      const SizedBox(height: 4),
+                      Text(
+                        hasLastMonth
+                            ? 'vs. \$${_lastMonthSpending.toStringAsFixed(2)} same period last month'
+                            : 'No spending recorded last month',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.online_prediction_rounded,
+                            size: 14,
+                            color: theme.colorScheme.primary.withAlpha(200),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Projected EOM: \$${_projectedThisMonthSpending.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                if (hasLastMonth)
+                if (hasLastMonth) ...[
+                  const SizedBox(width: 16),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
@@ -224,6 +382,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
+                ],
               ],
             ),
             const SizedBox(height: 20),

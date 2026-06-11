@@ -227,6 +227,77 @@ class _TransactionTableState extends State<TransactionTable> {
     }
   }
 
+  void _editClassification(TransactionEntry transaction) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          title: const Text('Change Billing Classification', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.trending_up, color: Theme.of(context).colorScheme.primary),
+                title: const Text('Variable / Daily Spend', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                subtitle: const Text('Food, entertainment, shopping. Projected based on daily run rate.', style: TextStyle(fontSize: 11)),
+                onTap: () => Navigator.pop(context, 'variable'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.repeat, color: Colors.greenAccent),
+                title: const Text('Fixed / Bill / Recurring', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                subtitle: const Text('Rent, utilities, subscriptions. Treated as flat monthly cost.', style: TextStyle(fontSize: 11)),
+                onTap: () => Navigator.pop(context, 'fixed'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.bolt, color: Colors.orangeAccent),
+                title: const Text('One-Off / Exceptional', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                subtitle: const Text('Medical emergency, new computer. Excluded from daily projections.', style: TextStyle(fontSize: 11)),
+                onTap: () => Navigator.pop(context, 'one_off'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null && result.isNotEmpty) {
+      if (!mounted) return;
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      final errorColor = Theme.of(context).colorScheme.error;
+      setState(() {
+        _updatingTransactionId = transaction.id;
+      });
+      try {
+        await DatabaseService.instance.saveTransactionPreference(
+          transaction.id,
+          classification: result,
+        );
+        await widget.onCategoryChanged();
+      } catch (e) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to update classification: $e'),
+            backgroundColor: errorColor,
+          ),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _updatingTransactionId = null;
+          });
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Map<String, List<(TransactionEntry, double)>> groupedTransactions = {};
@@ -341,7 +412,7 @@ class _TransactionTableState extends State<TransactionTable> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  getCategoryLabel(entry.$1.type),
+                                  '${getCategoryLabel(entry.$1.type)} • ${entry.$1.billingClassification.toUpperCase()}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Theme.of(
@@ -379,6 +450,8 @@ class _TransactionTableState extends State<TransactionTable> {
                                     onSelected: (value) async {
                                       if (value == 'edit') {
                                         _editCategory(entry.$1);
+                                      } else if (value == 'classify') {
+                                        _editClassification(entry.$1);
                                       } else if (value == 'hide' || value == 'unhide') {
                                         final isHidden = value == 'hide';
                                         final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -414,6 +487,10 @@ class _TransactionTableState extends State<TransactionTable> {
                                       value: 'edit',
                                       child: Text('Edit Category'),
                                     ),
+                                    const PopupMenuItem(
+                                      value: 'classify',
+                                      child: Text('Edit Classification'),
+                                    ),
                                     PopupMenuItem(
                                       value: entry.$1.isHidden ? 'unhide' : 'hide',
                                       child: Text(
@@ -424,12 +501,12 @@ class _TransactionTableState extends State<TransactionTable> {
                                     ),
                                   ],
                                 ),
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                }),
               ],
             );
           }),
