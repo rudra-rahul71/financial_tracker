@@ -162,7 +162,7 @@ class _SavingsPageState extends State<SavingsPage> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Savings Pool Config'),
+                  const Expanded(child: Text('Savings Pool')),
                   TextButton(
                     onPressed: () async {
                       final depositoryIds = depositoryAccounts

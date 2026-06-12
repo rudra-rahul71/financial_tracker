@@ -451,36 +451,38 @@ class _TransactionsPageState extends State<TransactionsPage> {
       label = '${_selectedAccountKeys.length} Accounts';
     }
 
-    return IntrinsicWidth(
-      child: GestureDetector(
-        onTap: _showMultiSelectDialog,
-        child: Container(
-          height: 40,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onPrimary,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.account_balance,
-                size: 16,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
+    return GestureDetector(
+      onTap: _showMultiSelectDialog,
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.onPrimary,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.account_balance,
+              size: 16,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
                 label,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_drop_down, size: 20),
-            ],
-          ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_drop_down, size: 20),
+          ],
         ),
       ),
     );
@@ -522,7 +524,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               filterUpdated: _updateDateFilter,
                             ),
                             const SizedBox(width: 12),
-                            accountSelector(),
+                            Flexible(
+                              child: accountSelector(),
+                            ),
                           ],
                         ),
                         SizedBox(height: 12),
