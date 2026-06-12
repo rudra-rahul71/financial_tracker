@@ -26,7 +26,10 @@ class Connection {
     }
 
     return Connection(
-      accounts: Account.fromJsonList(json['item']['item_id'], json['accounts'] ?? []),
+      accounts: Account.fromJsonList(
+        json['item']['item_id'],
+        json['accounts'] ?? [],
+      ),
       added: TransactionEntry.fromJsonList(json['added'] ?? []),
       modified: TransactionEntry.fromJsonList(json['modified'] ?? []),
       removed: parseRemoved(json['removed'] as List<dynamic>?),

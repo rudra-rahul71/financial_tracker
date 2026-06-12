@@ -9,6 +9,7 @@ import 'package:financial_tracker/features/subscriptions/presentation/pages/subs
 import 'package:financial_tracker/features/profile/presentation/pages/profile.dart';
 import 'package:financial_tracker/features/transactions/presentation/pages/transactions.dart';
 import 'package:financial_tracker/features/vault/presentation/pages/vault.dart';
+import 'package:financial_tracker/features/savings/presentation/pages/savings.dart';
 import 'package:financial_tracker/core/network/api_service.dart';
 import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:financial_tracker/core/widgets/app_shell.dart';
@@ -161,6 +162,12 @@ final GoRouter _router = GoRouter(
           path: '/vault',
           builder: (BuildContext context, GoRouterState state) {
             return const VaultPage();
+          },
+        ),
+        GoRoute(
+          path: '/savings',
+          builder: (BuildContext context, GoRouterState state) {
+            return const SavingsPage();
           },
         ),
         GoRoute(

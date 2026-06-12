@@ -61,9 +61,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     final theme = Theme.of(context);
-    final displayName = _user!.displayName ?? _user!.email?.split('@').first ?? 'User';
+    final displayName =
+        _user!.displayName ?? _user!.email?.split('@').first ?? 'User';
     final email = _user!.email ?? '';
-    final initials = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+    final initials = displayName.isNotEmpty
+        ? displayName[0].toUpperCase()
+        : 'U';
 
     return Scaffold(
       body: SafeArea(
@@ -88,7 +91,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       const SizedBox(height: 10),
                       CircleAvatar(
                         radius: 50,
-                        backgroundColor: theme.colorScheme.primary.withAlpha(38),
+                        backgroundColor: theme.colorScheme.primary.withAlpha(
+                          38,
+                        ),
                         child: Text(
                           initials,
                           style: TextStyle(
@@ -160,10 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(width: 12),
                 const Text(
                   'Linked Bank Connections',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -200,7 +202,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 itemBuilder: (context, index) {
                   final account = _accounts[index];
                   final isCredit = account.type == 'credit';
-                  final balance = isCredit ? (account.current ?? 0.0) : (account.available ?? account.current ?? 0.0);
+                  final balance = isCredit
+                      ? (account.current ?? 0.0)
+                      : (account.available ?? account.current ?? 0.0);
                   final isNegative = balance < 0;
 
                   return Padding(
@@ -257,7 +261,10 @@ class _ProfilePageState extends State<ProfilePage> {
               onTap: () => context.push('/accounts'),
               borderRadius: BorderRadius.circular(8),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 4.0,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -394,9 +401,7 @@ class _FirebaseProfilePageState extends State<FirebaseProfilePage> {
                     header: 'Personal Settings',
                     sub: 'Manage your credentials and authentication settings',
                   ),
-                  Expanded(
-                    child: ProfileScreen(actions: [_signOut()]),
-                  ),
+                  Expanded(child: ProfileScreen(actions: [_signOut()])),
                 ],
               ),
             ),

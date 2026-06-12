@@ -77,8 +77,12 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
       }
 
       // Normalize amount to monthly spend
-      final double rawAmount = _parseAmount(outflow['average_amount']?['amount']).abs();
-      final String frequency = (outflow['frequency'] ?? '').toString().toLowerCase();
+      final double rawAmount = _parseAmount(
+        outflow['average_amount']?['amount'],
+      ).abs();
+      final String frequency = (outflow['frequency'] ?? '')
+          .toString()
+          .toLowerCase();
 
       double monthlyAmount = 0.0;
       if (isActive) {
@@ -167,8 +171,18 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
         final monthInt = int.tryParse(parts[1]) ?? 1;
         final day = int.tryParse(parts[2]) ?? 1;
         const months = [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
         ];
         if (monthInt >= 1 && monthInt <= 12) {
           final month = months[monthInt - 1];
@@ -182,8 +196,12 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
 
   void _showStreamDetails(dynamic stream, bool isInflow) {
     final String titleName = _getStreamName(stream);
-    final double avgAmount = _parseAmount(stream['average_amount']?['amount']).abs();
-    final double lastAmount = _parseAmount(stream['last_amount']?['amount']).abs();
+    final double avgAmount = _parseAmount(
+      stream['average_amount']?['amount'],
+    ).abs();
+    final double lastAmount = _parseAmount(
+      stream['last_amount']?['amount'],
+    ).abs();
     final String frequency = stream['frequency'] ?? 'Unknown';
     final String status = stream['status'] ?? 'Unknown';
     final String? category = stream['personal_finance_category']?['primary'];
@@ -315,16 +333,33 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
               ),
               const SizedBox(height: 24),
               // Info Details List
-              _buildInfoRow('Frequency', _getFrequencyLabel(frequency), Icons.repeat, theme),
-              _buildInfoRow('Status', status.toUpperCase(), Icons.info_outline, theme),
+              _buildInfoRow(
+                'Frequency',
+                _getFrequencyLabel(frequency),
+                Icons.repeat,
+                theme,
+              ),
+              _buildInfoRow(
+                'Status',
+                status.toUpperCase(),
+                Icons.info_outline,
+                theme,
+              ),
               if (nextDateStr != null && nextDateStr.isNotEmpty)
                 _buildInfoRow(
-                  isInflow ? 'Predicted Next Deposit' : 'Predicted Next Payment',
+                  isInflow
+                      ? 'Predicted Next Deposit'
+                      : 'Predicted Next Payment',
                   _formatDate(nextDateStr, includeYear: true),
                   Icons.calendar_today_outlined,
                   theme,
                 ),
-              _buildInfoRow('Associated Transactions', '${txIds.length} payments tracked', Icons.receipt_long_outlined, theme),
+              _buildInfoRow(
+                'Associated Transactions',
+                '${txIds.length} payments tracked',
+                Icons.receipt_long_outlined,
+                theme,
+              ),
               const SizedBox(height: 16),
             ],
           ),
@@ -333,7 +368,12 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
     );
   }
 
-  Widget _buildDetailStatCard(String label, String value, ThemeData theme, {required bool isInflow}) {
+  Widget _buildDetailStatCard(
+    String label,
+    String value,
+    ThemeData theme, {
+    required bool isInflow,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -367,7 +407,12 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon, ThemeData theme) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    IconData icon,
+    ThemeData theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -384,10 +429,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -526,7 +568,9 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
       itemBuilder: (context, index) {
         final stream = streams[index];
         final String name = _getStreamName(stream);
-        final double rawAmount = _parseAmount(stream['average_amount']?['amount']).abs();
+        final double rawAmount = _parseAmount(
+          stream['average_amount']?['amount'],
+        ).abs();
         final String frequency = stream['frequency'] ?? '';
         final bool isActive = stream['is_active'] == true;
         final String? nextDateStr = _safeString(stream['predicted_next_date']);
@@ -586,7 +630,9 @@ class _SubscriptionsPageState extends State<SubscriptionsPage>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          isActive && nextDateStr != null && nextDateStr.isNotEmpty
+                          isActive &&
+                                  nextDateStr != null &&
+                                  nextDateStr.isNotEmpty
                               ? '${_getFrequencyLabel(freqLabel)} • $renewalText'
                               : _getFrequencyLabel(freqLabel),
                           style: TextStyle(

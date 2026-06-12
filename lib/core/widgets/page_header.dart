@@ -24,7 +24,11 @@ class PageHeader extends StatefulWidget {
 }
 
 class _PageHeaderState extends State<PageHeader> {
-  Widget _buildActions(BuildContext context, {required bool isWrapped, double? maxWidth}) {
+  Widget _buildActions(
+    BuildContext context, {
+    required bool isWrapped,
+    double? maxWidth,
+  }) {
     final hasActions = widget.actions != null && widget.actions!.isNotEmpty;
     if (!hasActions && !widget.showProfileButton) {
       return const SizedBox.shrink();
@@ -70,8 +74,11 @@ class _PageHeaderState extends State<PageHeader> {
       builder: (context, constraints) {
         const double paddingOffset = 40.0;
         final double backButtonOffset = widget.showBackButton ? 72.0 : 0.0;
-        final double maxTextWidth = (constraints.maxWidth - paddingOffset - backButtonOffset)
-            .clamp(120.0, double.infinity);
+        final double maxTextWidth =
+            (constraints.maxWidth - paddingOffset - backButtonOffset).clamp(
+              120.0,
+              double.infinity,
+            );
 
         if (widget.wrapAction) {
           return Padding(
@@ -131,7 +138,11 @@ class _PageHeaderState extends State<PageHeader> {
                       ),
                     ],
                   ),
-                  _buildActions(context, isWrapped: true, maxWidth: constraints.maxWidth - paddingOffset),
+                  _buildActions(
+                    context,
+                    isWrapped: true,
+                    maxWidth: constraints.maxWidth - paddingOffset,
+                  ),
                 ],
               ),
             ),
@@ -190,7 +201,8 @@ class _PageHeaderState extends State<PageHeader> {
                     ],
                   ),
                 ),
-                if ((widget.actions != null && widget.actions!.isNotEmpty) || widget.showProfileButton) ...[
+                if ((widget.actions != null && widget.actions!.isNotEmpty) ||
+                    widget.showProfileButton) ...[
                   const SizedBox(width: 16),
                   _buildActions(context, isWrapped: false),
                 ],
@@ -202,4 +214,3 @@ class _PageHeaderState extends State<PageHeader> {
     );
   }
 }
-

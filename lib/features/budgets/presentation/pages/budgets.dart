@@ -23,8 +23,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
 
   // Onboarding Form Controller/State
   String? _onboardingCategory;
-  final TextEditingController _onboardingCustomCategoryController = TextEditingController();
-  final TextEditingController _onboardingLimitController = TextEditingController();
+  final TextEditingController _onboardingCustomCategoryController =
+      TextEditingController();
+  final TextEditingController _onboardingLimitController =
+      TextEditingController();
   bool _onboardingIsCustom = false;
   bool _onboardingLimitFocused = false;
 
@@ -48,12 +50,14 @@ class _BudgetsPageState extends State<BudgetsPage> {
 
     try {
       final budgets = await _databaseService.getBudgets();
-      
+
       final dateRange = ApiService.currentFilter.getDateTimeRange();
       final startDate = dateRange.start;
-      
+
       // Load transactions since the start of the selected month
-      final transactions = await _databaseService.getTransactions(since: startDate);
+      final transactions = await _databaseService.getTransactions(
+        since: startDate,
+      );
 
       // Filter client-side to only keep transactions that occurred within the selected range
       final filteredTransactions = transactions.where((t) {
@@ -73,9 +77,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
         setState(() {
           _loading = false;
         });
-        SnackbarService(context).showErrorSnackbar(
-          message: 'Failed to load budgets data: $e',
-        );
+        SnackbarService(
+          context,
+        ).showErrorSnackbar(message: 'Failed to load budgets data: $e');
       }
     }
   }
@@ -132,7 +136,8 @@ class _BudgetsPageState extends State<BudgetsPage> {
 
     if (mounted) {
       SnackbarService(context).showSuccessSnackbar(
-        message: 'Budget for ${getCategoryLabel(category)} successfully created!',
+        message:
+            'Budget for ${getCategoryLabel(category)} successfully created!',
       );
     }
   }
@@ -143,9 +148,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
     await _loadData();
 
     if (mounted) {
-      SnackbarService(context).showSuccessSnackbar(
-        message: 'Budget updated successfully!',
-      );
+      SnackbarService(
+        context,
+      ).showSuccessSnackbar(message: 'Budget updated successfully!');
     }
   }
 
@@ -154,15 +159,17 @@ class _BudgetsPageState extends State<BudgetsPage> {
     await _loadData();
 
     if (mounted) {
-      SnackbarService(context).showSuccessSnackbar(
-        message: 'Deleted budget for $categoryLabel.',
-      );
+      SnackbarService(
+        context,
+      ).showSuccessSnackbar(message: 'Deleted budget for $categoryLabel.');
     }
   }
 
   void _showCreateDialog() {
     final availableCategories = _getAvailableCategories();
-    String? selectedCategory = availableCategories.isNotEmpty ? availableCategories.first : null;
+    String? selectedCategory = availableCategories.isNotEmpty
+        ? availableCategories.first
+        : null;
     bool isCustom = false;
     final customCategoryController = TextEditingController();
     final limitController = TextEditingController();
@@ -187,12 +194,18 @@ class _BudgetsPageState extends State<BudgetsPage> {
                   children: [
                     const Text(
                       'Choose Category',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       isExpanded: true,
-                      initialValue: isCustom ? 'CUSTOM_OPTION' : selectedCategory,
+                      initialValue: isCustom
+                          ? 'CUSTOM_OPTION'
+                          : selectedCategory,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Theme.of(context).colorScheme.onPrimary,
@@ -200,17 +213,31 @@ class _BudgetsPageState extends State<BudgetsPage> {
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
                       dropdownColor: Theme.of(context).colorScheme.onPrimary,
                       items: [
-                        ...availableCategories.map((c) => DropdownMenuItem<String>(
-                              value: c,
-                              child: Text(getCategoryLabel(c), style: const TextStyle(fontSize: 14)),
-                            )),
+                        ...availableCategories.map(
+                          (c) => DropdownMenuItem<String>(
+                            value: c,
+                            child: Text(
+                              getCategoryLabel(c),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ),
                         const DropdownMenuItem<String>(
                           value: 'CUSTOM_OPTION',
-                          child: Text('+ Add Custom Category...', style: TextStyle(fontSize: 14, color: Colors.greenAccent)),
+                          child: Text(
+                            '+ Add Custom Category...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.greenAccent,
+                            ),
+                          ),
                         ),
                       ],
                       onChanged: (val) {
@@ -228,7 +255,11 @@ class _BudgetsPageState extends State<BudgetsPage> {
                       const SizedBox(height: 16),
                       const Text(
                         'Custom Category Name',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
@@ -242,14 +273,21 @@ class _BudgetsPageState extends State<BudgetsPage> {
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ],
                     const SizedBox(height: 16),
                     const Text(
                       'Monthly Limit Amount',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Focus(
@@ -260,9 +298,15 @@ class _BudgetsPageState extends State<BudgetsPage> {
                       },
                       child: TextField(
                         controller: limitController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: InputDecoration(
-                          prefixText: createLimitFocused || limitController.text.isNotEmpty ? '\$ ' : null,
+                          prefixText:
+                              createLimitFocused ||
+                                  limitController.text.isNotEmpty
+                              ? '\$ '
+                              : null,
                           hintText: createLimitFocused ? '500.00' : null,
                           filled: true,
                           fillColor: Theme.of(context).colorScheme.onPrimary,
@@ -270,7 +314,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -280,7 +327,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -303,7 +353,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
                         );
                         return;
                       }
-                      categoryKey = customName.toUpperCase().replaceAll(' ', '_');
+                      categoryKey = customName.toUpperCase().replaceAll(
+                        ' ',
+                        '_',
+                      );
                     } else {
                       if (selectedCategory == null) {
                         SnackbarService(context).showErrorSnackbar(
@@ -320,7 +373,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: const Text('Create'),
                 ),
@@ -333,7 +388,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
   }
 
   void _showEditDialog(Budget budget) {
-    final limitController = TextEditingController(text: budget.limitAmount.toStringAsFixed(2));
+    final limitController = TextEditingController(
+      text: budget.limitAmount.toStringAsFixed(2),
+    );
 
     showDialog(
       context: context,
@@ -351,13 +408,19 @@ class _BudgetsPageState extends State<BudgetsPage> {
             children: [
               const Text(
                 'Monthly Limit Amount',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: limitController,
                 autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   prefixText: '\$ ',
                   filled: true,
@@ -366,7 +429,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
@@ -394,7 +460,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: const Text('Save'),
             ),
@@ -412,8 +480,13 @@ class _BudgetsPageState extends State<BudgetsPage> {
         return AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.surface,
           surfaceTintColor: Colors.transparent,
-          title: const Text('Delete Budget', style: TextStyle(fontWeight: FontWeight.bold)),
-          content: Text('Are you sure you want to delete the budget for $label? This action cannot be undone.'),
+          title: const Text(
+            'Delete Budget',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Are you sure you want to delete the budget for $label? This action cannot be undone.',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -427,7 +500,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
                 foregroundColor: Theme.of(context).colorScheme.onError,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               child: const Text('Delete'),
             ),
@@ -493,12 +568,18 @@ class _BudgetsPageState extends State<BudgetsPage> {
               const SizedBox(height: 30),
               const Text(
                 'Select Spending Category',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 isExpanded: true,
-                initialValue: _onboardingIsCustom ? 'CUSTOM_ONBOARD' : _onboardingCategory,
+                initialValue: _onboardingIsCustom
+                    ? 'CUSTOM_ONBOARD'
+                    : _onboardingCategory,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.onPrimary,
@@ -506,17 +587,28 @@ class _BudgetsPageState extends State<BudgetsPage> {
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                 ),
                 dropdownColor: Theme.of(context).colorScheme.onPrimary,
                 items: [
-                  ...availableCategories.map((c) => DropdownMenuItem<String>(
-                        value: c,
-                        child: Text(getCategoryLabel(c), style: const TextStyle(fontSize: 14)),
-                      )),
+                  ...availableCategories.map(
+                    (c) => DropdownMenuItem<String>(
+                      value: c,
+                      child: Text(
+                        getCategoryLabel(c),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ),
                   const DropdownMenuItem<String>(
                     value: 'CUSTOM_ONBOARD',
-                    child: Text('+ Add Custom Category...', style: TextStyle(fontSize: 14, color: Colors.greenAccent)),
+                    child: Text(
+                      '+ Add Custom Category...',
+                      style: TextStyle(fontSize: 14, color: Colors.greenAccent),
+                    ),
                   ),
                 ],
                 onChanged: (val) {
@@ -534,7 +626,11 @@ class _BudgetsPageState extends State<BudgetsPage> {
                 const SizedBox(height: 16),
                 const Text(
                   'Custom Category Name',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -547,14 +643,21 @@ class _BudgetsPageState extends State<BudgetsPage> {
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
                   ),
                 ),
               ],
               const SizedBox(height: 16),
               const Text(
                 'Monthly Limit Amount',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
               const SizedBox(height: 8),
               Focus(
@@ -565,9 +668,15 @@ class _BudgetsPageState extends State<BudgetsPage> {
                 },
                 child: TextField(
                   controller: _onboardingLimitController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
-                    prefixText: _onboardingLimitFocused || _onboardingLimitController.text.isNotEmpty ? '\$ ' : null,
+                    prefixText:
+                        _onboardingLimitFocused ||
+                            _onboardingLimitController.text.isNotEmpty
+                        ? '\$ '
+                        : null,
                     hintText: _onboardingLimitFocused ? '500.00' : null,
                     filled: true,
                     fillColor: Theme.of(context).colorScheme.onPrimary,
@@ -575,7 +684,10 @@ class _BudgetsPageState extends State<BudgetsPage> {
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
                   ),
                 ),
               ),
@@ -594,7 +706,8 @@ class _BudgetsPageState extends State<BudgetsPage> {
 
                   String categoryKey = '';
                   if (_onboardingIsCustom) {
-                    final customName = _onboardingCustomCategoryController.text.trim();
+                    final customName = _onboardingCustomCategoryController.text
+                        .trim();
                     if (customName.isEmpty) {
                       SnackbarService(context).showErrorSnackbar(
                         message: 'Please enter a custom category name.',
@@ -604,9 +717,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
                     categoryKey = customName.toUpperCase().replaceAll(' ', '_');
                   } else {
                     if (_onboardingCategory == null) {
-                      SnackbarService(context).showErrorSnackbar(
-                        message: 'Please select a category.',
-                      );
+                      SnackbarService(
+                        context,
+                      ).showErrorSnackbar(message: 'Please select a category.');
                       return;
                     }
                     categoryKey = _onboardingCategory!;
@@ -632,7 +745,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
@@ -651,10 +766,7 @@ class _BudgetsPageState extends State<BudgetsPage> {
       final spent = _calculateSpent(budget.category);
       totalBudgeted += budget.limitAmount;
       totalSpent += spent;
-      return _BudgetCardDetail(
-        budget: budget,
-        spent: spent,
-      );
+      return _BudgetCardDetail(budget: budget, spent: spent);
     }).toList();
 
     // Sort budget cards:
@@ -673,15 +785,21 @@ class _BudgetsPageState extends State<BudgetsPage> {
       } else if (!aIsOver && bIsOver) {
         return 1;
       } else {
-        final aRatio = a.budget.limitAmount > 0 ? (a.spent / a.budget.limitAmount) : 0.0;
-        final bRatio = b.budget.limitAmount > 0 ? (b.spent / b.budget.limitAmount) : 0.0;
+        final aRatio = a.budget.limitAmount > 0
+            ? (a.spent / a.budget.limitAmount)
+            : 0.0;
+        final bRatio = b.budget.limitAmount > 0
+            ? (b.spent / b.budget.limitAmount)
+            : 0.0;
         return bRatio.compareTo(aRatio);
       }
     });
 
     double remainingOverall = totalBudgeted - totalSpent;
     bool isOverBudgetOverall = remainingOverall < 0;
-    final bool anyCategoryOver = budgetDetails.any((d) => d.spent > d.budget.limitAmount);
+    final bool anyCategoryOver = budgetDetails.any(
+      (d) => d.spent > d.budget.limitAmount,
+    );
 
     return Expanded(
       child: SingleChildScrollView(
@@ -692,7 +810,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Card(
                 elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -703,13 +823,16 @@ class _BudgetsPageState extends State<BudgetsPage> {
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final isNarrow = constraints.maxWidth < 500;
-                          
+
                           final statusIcon = Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isOverBudgetOverall || anyCategoryOver
-                                  ? Theme.of(context).colorScheme.error.withValues(alpha: 0.15)
-                                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.error.withValues(alpha: 0.15)
+                                  : Theme.of(context).colorScheme.primary
+                                        .withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -722,25 +845,29 @@ class _BudgetsPageState extends State<BudgetsPage> {
                               size: 32,
                             ),
                           );
-                          
+
                           final statusText = Column(
-                            crossAxisAlignment: isNarrow ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                            crossAxisAlignment: isNarrow
+                                ? CrossAxisAlignment.center
+                                : CrossAxisAlignment.start,
                             children: [
                               Text(
                                 isOverBudgetOverall
                                     ? 'Budget Status: Critical'
                                     : anyCategoryOver
-                                        ? 'Budget Status: Warning'
-                                        : 'Budget Status: Healthy',
-                                textAlign: isNarrow ? TextAlign.center : TextAlign.start,
+                                    ? 'Budget Status: Warning'
+                                    : 'Budget Status: Healthy',
+                                textAlign: isNarrow
+                                    ? TextAlign.center
+                                    : TextAlign.start,
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: isOverBudgetOverall
                                       ? Theme.of(context).colorScheme.error
                                       : anyCategoryOver
-                                          ? Colors.orangeAccent
-                                          : Theme.of(context).colorScheme.primary,
+                                      ? Colors.orangeAccent
+                                      : Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -748,10 +875,16 @@ class _BudgetsPageState extends State<BudgetsPage> {
                                 isOverBudgetOverall
                                     ? 'You have exceeded your overall monthly spending limit.'
                                     : anyCategoryOver
-                                        ? 'You have exceeded spending limits in some specific categories.'
-                                        : 'Awesome! Your spending is well within limits in all categories.',
-                                textAlign: isNarrow ? TextAlign.center : TextAlign.start,
-                                style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
+                                    ? 'You have exceeded spending limits in some specific categories.'
+                                    : 'Awesome! Your spending is well within limits in all categories.',
+                                textAlign: isNarrow
+                                    ? TextAlign.center
+                                    : TextAlign.start,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey,
+                                  height: 1.4,
+                                ),
                               ),
                             ],
                           );
@@ -777,16 +910,13 @@ class _BudgetsPageState extends State<BudgetsPage> {
                           }
                         },
                       ),
-                      
-
-
                     ],
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Budgets List Container
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -795,13 +925,18 @@ class _BudgetsPageState extends State<BudgetsPage> {
                 children: [
                   Text(
                     'Spending Limits (${ApiService.currentFilter.getLabel()})',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   ...budgetDetails.map((detail) {
                     final b = detail.budget;
                     final spent = detail.spent;
-                    final ratio = b.limitAmount > 0 ? (spent / b.limitAmount) : 0.0;
+                    final ratio = b.limitAmount > 0
+                        ? (spent / b.limitAmount)
+                        : 0.0;
                     final percentage = (ratio * 100).toStringAsFixed(0);
                     final isOverBudget = spent > b.limitAmount;
                     final remaining = b.limitAmount - spent;
@@ -819,7 +954,9 @@ class _BudgetsPageState extends State<BudgetsPage> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
                       elevation: 2,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       color: Theme.of(context).colorScheme.surfaceContainerLow,
                       child: Padding(
                         padding: const EdgeInsets.all(20.0),
@@ -835,11 +972,15 @@ class _BudgetsPageState extends State<BudgetsPage> {
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: progressColor.withValues(alpha: 0.15),
+                                          color: progressColor.withValues(
+                                            alpha: 0.15,
+                                          ),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
-                                          isOverBudget ? Icons.warning : Icons.donut_large,
+                                          isOverBudget
+                                              ? Icons.warning
+                                              : Icons.donut_large,
                                           color: progressColor,
                                           size: 20,
                                         ),
@@ -847,14 +988,18 @@ class _BudgetsPageState extends State<BudgetsPage> {
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
                                               getCategoryLabel(b.category),
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
-                                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                             Text(
                                               isOverBudget
@@ -864,8 +1009,12 @@ class _BudgetsPageState extends State<BudgetsPage> {
                                               maxLines: 1,
                                               style: TextStyle(
                                                 fontSize: 12,
-                                                color: isOverBudget ? Colors.redAccent : Colors.grey,
-                                                fontWeight: isOverBudget ? FontWeight.bold : FontWeight.normal,
+                                                color: isOverBudget
+                                                    ? Colors.redAccent
+                                                    : Colors.grey,
+                                                fontWeight: isOverBudget
+                                                    ? FontWeight.bold
+                                                    : FontWeight.normal,
                                               ),
                                             ),
                                           ],
@@ -884,34 +1033,42 @@ class _BudgetsPageState extends State<BudgetsPage> {
                                       _showDeleteDialog(b);
                                     }
                                   },
-                                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                                    const PopupMenuItem<String>(
-                                      value: 'edit',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.edit, size: 18),
-                                          SizedBox(width: 8),
-                                          Text('Edit Limit', style: TextStyle(fontSize: 14)),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem<String>(
-                                      value: 'delete',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.delete, size: 18, color: Colors.redAccent),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'Delete Budget',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.redAccent,
-                                            ),
+                                  itemBuilder: (BuildContext context) =>
+                                      <PopupMenuEntry<String>>[
+                                        const PopupMenuItem<String>(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.edit, size: 18),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Edit Limit',
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                        ),
+                                        PopupMenuItem<String>(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete,
+                                                size: 18,
+                                                color: Colors.redAccent,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Delete Budget',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.redAccent,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                 ),
                               ],
                             ),
@@ -921,11 +1078,17 @@ class _BudgetsPageState extends State<BudgetsPage> {
                               children: [
                                 Text(
                                   '\$${spent.toStringAsFixed(2)} spent',
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                                 Text(
                                   '$percentage% of \$${b.limitAmount.toStringAsFixed(2)}',
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ],
                             ),
@@ -935,8 +1098,12 @@ class _BudgetsPageState extends State<BudgetsPage> {
                               child: LinearProgressIndicator(
                                 value: ratio.clamp(0.0, 1.0),
                                 minHeight: 10,
-                                backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  progressColor,
+                                ),
                               ),
                             ),
                           ],
@@ -979,8 +1146,12 @@ class _BudgetsPageState extends State<BudgetsPage> {
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                        foregroundColor: Theme.of(context).colorScheme.inverseSurface,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.inverseSurface,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -1000,18 +1171,13 @@ class _BudgetsPageState extends State<BudgetsPage> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : showOnboarding
-                    ? _buildOnboardingFlow()
-                    : Column(
-                        children: [
-                          _buildDashboard(),
-                        ],
-                      ),
+                ? _buildOnboardingFlow()
+                : Column(children: [_buildDashboard()]),
           ),
         ],
       ),
     );
   }
-
 }
 
 class _BudgetCardDetail {

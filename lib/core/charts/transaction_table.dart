@@ -27,8 +27,6 @@ class _TransactionTableState extends State<TransactionTable> {
   List<(TransactionEntry, double)> balanceTracker = [];
   String? _updatingTransactionId;
 
-
-
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
 
@@ -234,26 +232,50 @@ class _TransactionTableState extends State<TransactionTable> {
         return AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.surface,
           surfaceTintColor: Colors.transparent,
-          title: const Text('Change Billing Classification', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Change Billing Classification',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.trending_up, color: Theme.of(context).colorScheme.primary),
-                title: const Text('Variable / Daily Spend', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                subtitle: const Text('Food, entertainment, shopping. Projected based on daily run rate.', style: TextStyle(fontSize: 11)),
+                leading: Icon(
+                  Icons.trending_up,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: const Text(
+                  'Variable / Daily Spend',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'Food, entertainment, shopping. Projected based on daily run rate.',
+                  style: TextStyle(fontSize: 11),
+                ),
                 onTap: () => Navigator.pop(context, 'variable'),
               ),
               ListTile(
                 leading: const Icon(Icons.repeat, color: Colors.greenAccent),
-                title: const Text('Fixed / Bill / Recurring', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                subtitle: const Text('Rent, utilities, subscriptions. Treated as flat monthly cost.', style: TextStyle(fontSize: 11)),
+                title: const Text(
+                  'Fixed / Bill / Recurring',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'Rent, utilities, subscriptions. Treated as flat monthly cost.',
+                  style: TextStyle(fontSize: 11),
+                ),
                 onTap: () => Navigator.pop(context, 'fixed'),
               ),
               ListTile(
                 leading: const Icon(Icons.bolt, color: Colors.orangeAccent),
-                title: const Text('One-Off / Exceptional', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                subtitle: const Text('Medical emergency, new computer. Excluded from daily projections.', style: TextStyle(fontSize: 11)),
+                title: const Text(
+                  'One-Off / Exceptional',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'Medical emergency, new computer. Excluded from daily projections.',
+                  style: TextStyle(fontSize: 11),
+                ),
                 onTap: () => Navigator.pop(context, 'one_off'),
               ),
             ],
@@ -302,7 +324,8 @@ class _TransactionTableState extends State<TransactionTable> {
   Widget build(BuildContext context) {
     Map<String, List<(TransactionEntry, double)>> groupedTransactions = {};
     for (var entry in balanceTracker) {
-      if (widget.selectedCategory != 'All Categories' && entry.$1.type != widget.selectedCategory) {
+      if (widget.selectedCategory != 'All Categories' &&
+          entry.$1.type != widget.selectedCategory) {
         continue;
       }
       String date = formatDate(entry.$1.date);
@@ -377,9 +400,9 @@ class _TransactionTableState extends State<TransactionTable> {
                       decoration: BoxDecoration(
                         color: isUpdating
                             ? Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.15)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.15)
                             : null,
                         border: Border(
                           bottom: BorderSide(
@@ -405,7 +428,9 @@ class _TransactionTableState extends State<TransactionTable> {
                                         ? FontStyle.italic
                                         : null,
                                     color: entry.$1.isPending
-                                        ? Theme.of(context).colorScheme.onSurface
+                                        ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
                                               .withValues(alpha: 0.6)
                                         : null,
                                   ),
@@ -442,7 +467,9 @@ class _TransactionTableState extends State<TransactionTable> {
                                     child: SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
                                     ),
                                   )
                                 : PopupMenuButton<String>(
@@ -452,10 +479,14 @@ class _TransactionTableState extends State<TransactionTable> {
                                         _editCategory(entry.$1);
                                       } else if (value == 'classify') {
                                         _editClassification(entry.$1);
-                                      } else if (value == 'hide' || value == 'unhide') {
+                                      } else if (value == 'hide' ||
+                                          value == 'unhide') {
                                         final isHidden = value == 'hide';
-                                        final scaffoldMessenger = ScaffoldMessenger.of(context);
-                                        final errorColor = Theme.of(context).colorScheme.error;
+                                        final scaffoldMessenger =
+                                            ScaffoldMessenger.of(context);
+                                        final errorColor = Theme.of(
+                                          context,
+                                        ).colorScheme.error;
                                         setState(() {
                                           _updatingTransactionId = entry.$1.id;
                                         });
@@ -469,7 +500,9 @@ class _TransactionTableState extends State<TransactionTable> {
                                         } catch (e) {
                                           scaffoldMessenger.showSnackBar(
                                             SnackBar(
-                                              content: Text('Failed to update preference: $e'),
+                                              content: Text(
+                                                'Failed to update preference: $e',
+                                              ),
                                               backgroundColor: errorColor,
                                             ),
                                           );
@@ -482,25 +515,27 @@ class _TransactionTableState extends State<TransactionTable> {
                                         }
                                       }
                                     },
-                                  itemBuilder: (context) => [
-                                    const PopupMenuItem(
-                                      value: 'edit',
-                                      child: Text('Edit Category'),
-                                    ),
-                                    const PopupMenuItem(
-                                      value: 'classify',
-                                      child: Text('Edit Classification'),
-                                    ),
-                                    PopupMenuItem(
-                                      value: entry.$1.isHidden ? 'unhide' : 'hide',
-                                      child: Text(
-                                        entry.$1.isHidden
-                                            ? 'Unhide from Analytics'
-                                            : 'Hide from Analytics',
+                                    itemBuilder: (context) => [
+                                      const PopupMenuItem(
+                                        value: 'edit',
+                                        child: Text('Edit Category'),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                      const PopupMenuItem(
+                                        value: 'classify',
+                                        child: Text('Edit Classification'),
+                                      ),
+                                      PopupMenuItem(
+                                        value: entry.$1.isHidden
+                                            ? 'unhide'
+                                            : 'hide',
+                                        child: Text(
+                                          entry.$1.isHidden
+                                              ? 'Unhide from Analytics'
+                                              : 'Hide from Analytics',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
                         ],
                       ),

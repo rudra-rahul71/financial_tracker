@@ -5,18 +5,10 @@ class Budget {
 
   static const String tableName = 'budgets';
 
-  Budget({
-    required this.id,
-    required this.category,
-    required this.limitAmount,
-  });
+  Budget({required this.id, required this.category, required this.limitAmount});
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'category': category,
-      'limitAmount': limitAmount,
-    };
+    return {'id': id, 'category': category, 'limitAmount': limitAmount};
   }
 
   factory Budget.fromMap(Map<String, dynamic> map) {
@@ -27,11 +19,7 @@ class Budget {
     );
   }
 
-  Budget copyWith({
-    String? id,
-    String? category,
-    double? limitAmount,
-  }) {
+  Budget copyWith({String? id, String? category, double? limitAmount}) {
     return Budget(
       id: id ?? this.id,
       category: category ?? this.category,

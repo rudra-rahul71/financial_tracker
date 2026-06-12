@@ -20,8 +20,16 @@ class _TransactionHistoryState extends State<TransactionHistory> {
   @override
   Widget build(BuildContext context) {
     final dateRange = ApiService.currentFilter.getDateTimeRange();
-    final DateTime rangeStart = DateTime(dateRange.start.year, dateRange.start.month, dateRange.start.day);
-    final DateTime rangeEnd = DateTime(dateRange.end.year, dateRange.end.month, dateRange.end.day);
+    final DateTime rangeStart = DateTime(
+      dateRange.start.year,
+      dateRange.start.month,
+      dateRange.start.day,
+    );
+    final DateTime rangeEnd = DateTime(
+      dateRange.end.year,
+      dateRange.end.month,
+      dateRange.end.day,
+    );
     final int displayDays = rangeEnd.difference(rangeStart).inDays;
 
     List<(Item, Account, List<TransactionEntry>, Set<String>, bool)> list = [];
@@ -64,9 +72,12 @@ class _TransactionHistoryState extends State<TransactionHistory> {
         String dateString =
             '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
 
-        double chartBalance = isCreditCard ? balanceTracker.abs() : balanceTracker;
+        double chartBalance = isCreditCard
+            ? balanceTracker.abs()
+            : balanceTracker;
 
-        final bool inRange = !currentDay.isBefore(rangeStart) && !currentDay.isAfter(rangeEnd);
+        final bool inRange =
+            !currentDay.isBefore(rangeStart) && !currentDay.isAfter(rangeEnd);
 
         if (inRange) {
           transactionList.add(
@@ -96,7 +107,13 @@ class _TransactionHistoryState extends State<TransactionHistory> {
           '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       activeDates.add(todayString);
 
-      list.add((entry.value.$1, entry.value.$2, transactionList, activeDates, isCreditCard));
+      list.add((
+        entry.value.$1,
+        entry.value.$2,
+        transactionList,
+        activeDates,
+        isCreditCard,
+      ));
     }
     dist = maxVal - minVal;
 
@@ -150,8 +167,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                   showTitles: true,
                   reservedSize: 40,
                   interval:
-                      86400000000.0 *
-                      math.max(1, (displayDays / 4).ceil()),
+                      86400000000.0 * math.max(1, (displayDays / 4).ceil()),
                   getTitlesWidget: (value, meta) {
                     final int micros = value.toInt();
                     final DateTime date = DateTime.fromMicrosecondsSinceEpoch(
@@ -234,7 +250,9 @@ class _TransactionHistoryState extends State<TransactionHistory> {
                           radius: 6,
                           color: Theme.of(context).colorScheme.onPrimary,
                           strokeWidth: 2,
-                          strokeColor: barData.color ?? Theme.of(context).colorScheme.primary,
+                          strokeColor:
+                              barData.color ??
+                              Theme.of(context).colorScheme.primary,
                         );
                       },
                     ),

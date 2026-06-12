@@ -79,7 +79,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
       } else {
         _selectedAccountKeys.add(key);
       }
-      _selectedTransactions = _groupedTransactions.where((e) => _selectedAccountKeys.contains(e.key));
+      _selectedTransactions = _groupedTransactions.where(
+        (e) => _selectedAccountKeys.contains(e.key),
+      );
       _updateInfoCards();
     });
   }
@@ -124,7 +126,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
       if (!mounted) return;
 
-      List<TransactionEntry> allTransactions = results[0] as List<TransactionEntry>;
+      List<TransactionEntry> allTransactions =
+          results[0] as List<TransactionEntry>;
       List<Account> accounts = results[1] as List<Account>;
       List<Item> items = results[2] as List<Item>;
 
@@ -159,12 +162,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
         if (_selectedAccountKeys.isEmpty) {
           _selectedAccountKeys = groupedTransactions.keys.toSet();
         } else {
-          _selectedAccountKeys = _selectedAccountKeys.intersection(groupedTransactions.keys.toSet());
+          _selectedAccountKeys = _selectedAccountKeys.intersection(
+            groupedTransactions.keys.toSet(),
+          );
           if (_selectedAccountKeys.isEmpty && groupedTransactions.isNotEmpty) {
             _selectedAccountKeys = groupedTransactions.keys.toSet();
           }
         }
-        _selectedTransactions = _groupedTransactions.where((e) => _selectedAccountKeys.contains(e.key));
+        _selectedTransactions = _groupedTransactions.where(
+          (e) => _selectedAccountKeys.contains(e.key),
+        );
         _updateInfoCards();
       });
     } finally {
@@ -338,7 +345,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             ),
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 8),
-                              foregroundColor: Theme.of(context).colorScheme.error,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.error,
                             ),
                           ),
                         ),
@@ -352,21 +361,26 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           shrinkWrap: true,
                           children: _groupedTransactions.map((entry) {
                             final key = entry.key;
-                            final isSelected = _selectedAccountKeys.contains(key);
+                            final isSelected = _selectedAccountKeys.contains(
+                              key,
+                            );
                             return Container(
                               margin: const EdgeInsets.only(bottom: 6),
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                        .withValues(alpha: 0.15)
+                                          .colorScheme
+                                          .primaryContainer
+                                          .withValues(alpha: 0.15)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: isSelected
-                                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
-                                      : Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                      ? Theme.of(context).colorScheme.primary
+                                            .withValues(alpha: 0.3)
+                                      : Theme.of(
+                                          context,
+                                        ).dividerColor.withValues(alpha: 0.1),
                                   width: 1,
                                 ),
                               ),
@@ -379,7 +393,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                   ),
                                 ),
                                 value: isSelected,
-                                activeColor: Theme.of(context).colorScheme.primary,
+                                activeColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                                 checkboxShape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -392,7 +408,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     _toggleAccountSelection(key);
                                   });
                                 },
-                                controlAffinity: ListTileControlAffinity.leading,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
                               ),
                             );
                           }).toList(),
@@ -420,12 +437,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget accountSelector() {
     String label;
-    if (_selectedAccountKeys.length == _groupedTransactions.length && _groupedTransactions.isNotEmpty) {
+    if (_selectedAccountKeys.length == _groupedTransactions.length &&
+        _groupedTransactions.isNotEmpty) {
       label = 'All Accounts';
     } else if (_selectedAccountKeys.isEmpty) {
       label = 'No Accounts';
     } else if (_selectedAccountKeys.length == 1) {
-      final selectedEntry = _groupedTransactions.firstWhere((e) => _selectedAccountKeys.contains(e.key));
+      final selectedEntry = _groupedTransactions.firstWhere(
+        (e) => _selectedAccountKeys.contains(e.key),
+      );
       label = '${selectedEntry.value.$1.name} - ${selectedEntry.value.$2.name}';
     } else {
       label = '${_selectedAccountKeys.length} Accounts';
@@ -452,7 +472,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(width: 8),
               const Icon(Icons.arrow_drop_down, size: 20),
@@ -561,7 +584,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 .expand((entry) => entry.value.$3)
                                 .toList(),
                             total: _selectedTransactions.length == 1
-                                ? (_selectedTransactions.first.value.$2.available ?? 0).toDouble()
+                                ? (_selectedTransactions
+                                              .first
+                                              .value
+                                              .$2
+                                              .available ??
+                                          0)
+                                      .toDouble()
                                 : 0.0,
                             onCategoryChanged: () async {
                               await _updateTransactions(showLoader: false);

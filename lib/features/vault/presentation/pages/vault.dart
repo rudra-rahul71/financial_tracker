@@ -39,11 +39,7 @@ class VaultPage extends StatelessWidget {
                   color: iconColor.withAlpha(38),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: iconColor,
-                ),
+                child: Icon(icon, size: 28, color: iconColor),
               ),
               const SizedBox(width: 20),
               Expanded(
@@ -102,6 +98,14 @@ class VaultPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 12),
+                      _buildHubCard(
+                        context,
+                        icon: Icons.savings_rounded,
+                        iconColor: Colors.greenAccent,
+                        title: 'Savings Goals',
+                        subtitle: 'Track and plan your long-term savings goals',
+                        onTap: () => context.push('/savings'),
+                      ),
                       _buildHubCard(
                         context,
                         icon: Icons.track_changes_rounded,

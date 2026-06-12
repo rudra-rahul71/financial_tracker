@@ -1,41 +1,39 @@
 import 'package:flutter/material.dart';
 
-enum DateFilterType {
-  rollingDays,
-  calendarMonth,
-}
+enum DateFilterType { rollingDays, calendarMonth }
 
 class DateFilter {
   final DateFilterType type;
-  final int value; // number of days for rolling, or month offset for calendar month
+  final int
+  value; // number of days for rolling, or month offset for calendar month
   final bool isHeader;
   final String? headerText;
   final bool isDivider;
 
   const DateFilter.rolling(this.value)
-      : type = DateFilterType.rollingDays,
-        isHeader = false,
-        isDivider = false,
-        headerText = null;
+    : type = DateFilterType.rollingDays,
+      isHeader = false,
+      isDivider = false,
+      headerText = null;
 
   const DateFilter.month(this.value)
-      : type = DateFilterType.calendarMonth,
-        isHeader = false,
-        isDivider = false,
-        headerText = null;
+    : type = DateFilterType.calendarMonth,
+      isHeader = false,
+      isDivider = false,
+      headerText = null;
 
   const DateFilter.header(this.headerText)
-      : type = DateFilterType.rollingDays,
-        value = -1,
-        isHeader = true,
-        isDivider = false;
+    : type = DateFilterType.rollingDays,
+      value = -1,
+      isHeader = true,
+      isDivider = false;
 
   const DateFilter.divider(int id)
-      : type = DateFilterType.rollingDays,
-        value = -1 - id,
-        isHeader = false,
-        isDivider = true,
-        headerText = null;
+    : type = DateFilterType.rollingDays,
+      value = -1 - id,
+      isHeader = false,
+      isDivider = true,
+      headerText = null;
 
   @override
   bool operator ==(Object other) =>
@@ -65,8 +63,18 @@ class DateFilter {
       final now = DateTime.now();
       final date = DateTime(now.year, now.month - value, 1);
       const List<String> monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
       ];
       final monthStr = monthNames[date.month - 1];
       final yearStr = date.year.toString();
@@ -79,7 +87,11 @@ class DateFilter {
   DateTimeRange getDateTimeRange() {
     final now = DateTime.now();
     if (type == DateFilterType.rollingDays) {
-      final startDate = DateTime(now.year, now.month, now.day).subtract(Duration(days: value));
+      final startDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: value));
       final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
       return DateTimeRange(start: startDate, end: endDate);
     } else {
@@ -177,11 +189,16 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
               }
               return Text(
                 item.getLabel(),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               );
             }).toList();
           },
-          items: _filterItems.map<DropdownMenuItem<DateFilter>>((DateFilter filter) {
+          items: _filterItems.map<DropdownMenuItem<DateFilter>>((
+            DateFilter filter,
+          ) {
             if (filter.isHeader) {
               return DropdownMenuItem<DateFilter>(
                 value: filter,
@@ -193,7 +210,9 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                       letterSpacing: 1.0,
                     ),
                   ),
@@ -216,7 +235,10 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                   padding: const EdgeInsets.only(left: 6.0),
                   child: Text(
                     filter.getLabel(),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ),
               );

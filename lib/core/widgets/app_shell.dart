@@ -25,7 +25,8 @@ class _NavigatorScafoldState extends State<NavigatorScafold> {
     if (path.startsWith('/analytics')) return 2;
     if (path.startsWith('/vault') ||
         path.startsWith('/budgets') ||
-        path.startsWith('/subscriptions')) {
+        path.startsWith('/subscriptions') ||
+        path.startsWith('/savings')) {
       return 3;
     }
     return null;

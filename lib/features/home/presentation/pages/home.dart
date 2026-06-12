@@ -38,7 +38,10 @@ class _HomePageState extends State<HomePage> {
       // Fetch Recent Transactions (take latest 4, unsorted from DB, we sort client-side)
       final allTransactions = await _databaseService.getTransactions();
       allTransactions.sort((a, b) => b.date.compareTo(a.date));
-      _recentTransactions = allTransactions.where((t) => !t.isHidden).take(4).toList();
+      _recentTransactions = allTransactions
+          .where((t) => !t.isHidden)
+          .take(4)
+          .toList();
 
       // Calculate spending for this month, last month, and the month before (month-to-date)
       final now = DateTime.now();
@@ -49,7 +52,9 @@ class _HomePageState extends State<HomePage> {
       final lastMonthYear = currentMonth == 1 ? currentYear - 1 : currentYear;
       final lastMonth = currentMonth == 1 ? 12 : currentMonth - 1;
 
-      final twoMonthsAgoYear = lastMonth == 1 ? lastMonthYear - 1 : lastMonthYear;
+      final twoMonthsAgoYear = lastMonth == 1
+          ? lastMonthYear - 1
+          : lastMonthYear;
       final twoMonthsAgo = lastMonth == 1 ? 12 : lastMonth - 1;
 
       double thisMonthSum = 0.0;
@@ -88,7 +93,8 @@ class _HomePageState extends State<HomePage> {
           if (tDate.day <= currentDay) {
             lastMonthSum += tx.amount;
           }
-        } else if (tDate.year == twoMonthsAgoYear && tDate.month == twoMonthsAgo) {
+        } else if (tDate.year == twoMonthsAgoYear &&
+            tDate.month == twoMonthsAgo) {
           // Compare month before last up to the same day of the month
           if (tDate.day <= currentDay) {
             twoMonthsAgoSum += tx.amount;
@@ -105,10 +111,12 @@ class _HomePageState extends State<HomePage> {
       final double projectedVariable = currentDay > 0
           ? (thisMonthVariable / currentDay) * totalDaysInMonth
           : 0.0;
-      _projectedThisMonthSpending = thisMonthFixed + thisMonthOneOff + projectedVariable;
+      _projectedThisMonthSpending =
+          thisMonthFixed + thisMonthOneOff + projectedVariable;
 
       if (lastMonthSum > 0) {
-        _spendingPercentChange = ((thisMonthSum - lastMonthSum) / lastMonthSum) * 100;
+        _spendingPercentChange =
+            ((thisMonthSum - lastMonthSum) / lastMonthSum) * 100;
       } else {
         _spendingPercentChange = 0.0;
       }
@@ -135,17 +143,11 @@ class _HomePageState extends State<HomePage> {
           ),
           title: Row(
             children: [
-              Icon(
-                Icons.insights_rounded,
-                color: theme.colorScheme.primary,
-              ),
+              Icon(Icons.insights_rounded, color: theme.colorScheme.primary),
               const SizedBox(width: 10),
               const Text(
                 'Spending Calculations',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
             ],
           ),
@@ -156,18 +158,24 @@ class _HomePageState extends State<HomePage> {
               children: [
                 const Text(
                   'This card compares your spending month-over-month and projects your end-of-month (EOM) total.',
-                  style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 _buildInfoDetail(
                   title: '📅 Month-to-Date (MTD)',
-                  description: 'Compares your actual spending from day 1 up to today against previous months for the exact same date range. This ensures a fair comparison mid-month.',
+                  description:
+                      'Compares your actual spending from day 1 up to today against previous months for the exact same date range. This ensures a fair comparison mid-month.',
                   theme: theme,
                 ),
                 const SizedBox(height: 12),
                 _buildInfoDetail(
                   title: '📈 Projected EOM',
-                  description: 'Estimated total spending by the end of the month. To prevent skewing, it uses a hybrid calculation:\n\n'
+                  description:
+                      'Estimated total spending by the end of the month. To prevent skewing, it uses a hybrid calculation:\n\n'
                       'Formula:\n'
                       'Projected = Fixed + One-Off + ((Variable / Current Day) * Days in Month)\n\n'
                       '• 🔄 Fixed Bills (Rent, Utilities) & ⚡ One-Off purchases are added flat (no run-rate scaling).\n'
@@ -177,7 +185,8 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 12),
                 _buildInfoDetail(
                   title: '👁️ Hidden Transactions',
-                  description: 'Any transaction marked as "Hidden from Analytics" is excluded from all counts and will not affect the actual or projected EOM totals.',
+                  description:
+                      'Any transaction marked as "Hidden from Analytics" is excluded from all counts and will not affect the actual or projected EOM totals.',
                   theme: theme,
                 ),
               ],
@@ -186,7 +195,10 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Got it',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
@@ -249,8 +261,12 @@ class _HomePageState extends State<HomePage> {
     // Determine the ratio between the three months for progress bars
     // To avoid overflow, we normalize them to a max of 1.0.
     double maxSpending = _thisMonthSpending;
-    if (_lastMonthSpending > maxSpending) maxSpending = _lastMonthSpending;
-    if (_twoMonthsAgoSpending > maxSpending) maxSpending = _twoMonthsAgoSpending;
+    if (_lastMonthSpending > maxSpending) {
+      maxSpending = _lastMonthSpending;
+    }
+    if (_twoMonthsAgoSpending > maxSpending) {
+      maxSpending = _twoMonthsAgoSpending;
+    }
     if (maxSpending <= 0) maxSpending = 1.0;
 
     final double thisMonthRatio = _thisMonthSpending / maxSpending;
@@ -261,9 +277,7 @@ class _HomePageState extends State<HomePage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withAlpha(51),
-        ),
+        side: BorderSide(color: theme.colorScheme.outlineVariant.withAlpha(51)),
       ),
       color: theme.colorScheme.surfaceContainerHighest.withAlpha(15),
       child: Padding(
@@ -280,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                       Icons.insights_rounded,
                       color: theme.colorScheme.primary,
                       size: 20,
-                ),
+                    ),
                     const SizedBox(width: 8),
                     const Text(
                       'Spending Insight',
@@ -293,7 +307,11 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.info_outline_rounded, size: 18, color: Colors.grey),
+                  icon: const Icon(
+                    Icons.info_outline_rounded,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
                   onPressed: () => _showProjectionInfoDialog(context, theme),
                   constraints: const BoxConstraints(),
                   padding: EdgeInsets.zero,
@@ -354,22 +372,19 @@ class _HomePageState extends State<HomePage> {
                 if (hasLastMonth) ...[
                   const SizedBox(width: 16),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: trendColor.withAlpha(25),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: trendColor.withAlpha(51),
-                      ),
+                      border: Border.all(color: trendColor.withAlpha(51)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          trendIcon,
-                          color: trendColor,
-                          size: 16,
-                        ),
+                        Icon(trendIcon, color: trendColor, size: 16),
                         const SizedBox(width: 4),
                         Text(
                           trendText,
@@ -404,7 +419,10 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: thisMonthRatio,
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest.withAlpha(51),
+                          backgroundColor: theme
+                              .colorScheme
+                              .surfaceContainerHighest
+                              .withAlpha(51),
                           color: theme.colorScheme.primary,
                           minHeight: 8,
                         ),
@@ -437,7 +455,10 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: lastMonthRatio,
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest.withAlpha(51),
+                          backgroundColor: theme
+                              .colorScheme
+                              .surfaceContainerHighest
+                              .withAlpha(51),
                           color: theme.colorScheme.onSurface.withAlpha(128),
                           minHeight: 8,
                         ),
@@ -470,7 +491,10 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: twoMonthsAgoRatio,
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest.withAlpha(51),
+                          backgroundColor: theme
+                              .colorScheme
+                              .surfaceContainerHighest
+                              .withAlpha(51),
                           color: theme.colorScheme.onSurface.withAlpha(76),
                           minHeight: 8,
                         ),
@@ -524,10 +548,11 @@ class _HomePageState extends State<HomePage> {
                               const SizedBox(height: 12),
                               _buildSpendingInsightCard(theme),
                               const SizedBox(height: 20),
-                              
+
                               // Recent Transactions section
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     'Recent Transactions',
@@ -537,13 +562,17 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   TextButton(
-                                    onPressed: () => context.go('/transactions'),
+                                    onPressed: () =>
+                                        context.go('/transactions'),
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text('View All'),
                                         SizedBox(width: 4),
-                                        Icon(Icons.arrow_forward_rounded, size: 16),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 16,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -556,25 +585,41 @@ class _HomePageState extends State<HomePage> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     side: BorderSide(
-                                      color: theme.colorScheme.outlineVariant.withAlpha(51),
+                                      color: theme.colorScheme.outlineVariant
+                                          .withAlpha(51),
                                     ),
                                   ),
-                                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(15),
+                                  color: theme
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withAlpha(15),
                                   child: const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 32.0,
+                                      horizontal: 16.0,
+                                    ),
                                     child: Center(
                                       child: Column(
                                         children: [
-                                          Icon(Icons.receipt_long_outlined, size: 48, color: Colors.grey),
+                                          Icon(
+                                            Icons.receipt_long_outlined,
+                                            size: 48,
+                                            color: Colors.grey,
+                                          ),
                                           SizedBox(height: 12),
                                           Text(
                                             'No transactions found',
-                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           SizedBox(height: 4),
                                           Text(
                                             'Connect a bank account to sync transactions.',
-                                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
                                             textAlign: TextAlign.center,
                                           ),
                                         ],
@@ -588,31 +633,52 @@ class _HomePageState extends State<HomePage> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     side: BorderSide(
-                                      color: theme.colorScheme.outlineVariant.withAlpha(51),
+                                      color: theme.colorScheme.outlineVariant
+                                          .withAlpha(51),
                                     ),
                                   ),
-                                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(15),
+                                  color: theme
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withAlpha(15),
                                   child: ListView.separated(
                                     shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     itemCount: _recentTransactions.length,
-                                    separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16),
+                                    separatorBuilder: (context, index) =>
+                                        const Divider(
+                                          height: 1,
+                                          indent: 16,
+                                          endIndent: 16,
+                                        ),
                                     itemBuilder: (context, index) {
                                       final tx = _recentTransactions[index];
                                       final isExpense = tx.amount > 0;
                                       final amountText = isExpense
                                           ? '-\$${tx.amount.toStringAsFixed(2)}'
                                           : '+\$${tx.amount.abs().toStringAsFixed(2)}';
-                                      
+
                                       return ListTile(
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 4,
+                                            ),
                                         leading: CircleAvatar(
                                           radius: 20,
                                           backgroundColor: isExpense
-                                              ? theme.colorScheme.errorContainer.withAlpha(25)
-                                              : theme.colorScheme.primaryContainer.withAlpha(25),
+                                              ? theme.colorScheme.errorContainer
+                                                    .withAlpha(25)
+                                              : theme
+                                                    .colorScheme
+                                                    .primaryContainer
+                                                    .withAlpha(25),
                                           child: Icon(
-                                            isExpense ? Icons.shopping_bag_outlined : Icons.monetization_on_outlined,
+                                            isExpense
+                                                ? Icons.shopping_bag_outlined
+                                                : Icons
+                                                      .monetization_on_outlined,
                                             color: isExpense
                                                 ? theme.colorScheme.error
                                                 : theme.colorScheme.primary,
@@ -632,7 +698,9 @@ class _HomePageState extends State<HomePage> {
                                           '${getCategoryLabel(tx.type)} • ${tx.date}',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: theme.colorScheme.onSurfaceVariant,
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
                                           ),
                                         ),
                                         trailing: Text(
@@ -645,7 +713,8 @@ class _HomePageState extends State<HomePage> {
                                                 : Colors.green,
                                           ),
                                         ),
-                                        onTap: () => context.go('/transactions'),
+                                        onTap: () =>
+                                            context.go('/transactions'),
                                       );
                                     },
                                   ),

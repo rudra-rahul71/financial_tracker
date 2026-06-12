@@ -6,8 +6,5 @@ class SyncCursor {
   static const String columnItemId = 'item_id';
   static const String columnNextCursor = 'next_cursor';
 
-  SyncCursor({
-    required this.itemId,
-    required this.nextCursor,
-  });
+  SyncCursor({required this.itemId, required this.nextCursor});
 }

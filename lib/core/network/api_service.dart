@@ -35,7 +35,9 @@ class ApiService {
   }
 
   // Kept for backward compatibility or charts scaling
-  static int get interval => _currentFilter.type == DateFilterType.rollingDays ? _currentFilter.value : 30;
+  static int get interval => _currentFilter.type == DateFilterType.rollingDays
+      ? _currentFilter.value
+      : 30;
 
   Future<void> searchAccounts(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -201,7 +203,9 @@ class ApiService {
     return null;
   }
 
-  Future<Map<String, dynamic>?> getRecurringTransactions(BuildContext context) async {
+  Future<Map<String, dynamic>?> getRecurringTransactions(
+    BuildContext context,
+  ) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return null;
@@ -227,9 +231,9 @@ class ApiService {
     } catch (e) {
       debugPrint('Exception in getRecurringTransactions: $e');
       if (context.mounted) {
-        SnackbarService(context).showErrorSnackbar(
-          message: 'Error fetching subscription data!',
-        );
+        SnackbarService(
+          context,
+        ).showErrorSnackbar(message: 'Error fetching subscription data!');
       }
     }
     return null;

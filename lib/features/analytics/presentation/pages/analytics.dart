@@ -62,7 +62,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       for (final transaction in transactions) {
         if (transaction.isHidden) continue;
 
-        final isMatchingMode = _showIncome ? transaction.amount < 0 : transaction.amount > 0;
+        final isMatchingMode = _showIncome
+            ? transaction.amount < 0
+            : transaction.amount > 0;
         if (isMatchingMode) {
           final amountValue = transaction.amount.abs();
           groupedTransactions.putIfAbsent(transaction.type, () => 0.0);
@@ -164,7 +166,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           ),
                         ),
                         BasicCard(
-                          title: _showIncome ? 'Income by Category' : 'Spending by Category',
+                          title: _showIncome
+                              ? 'Income by Category'
+                              : 'Spending by Category',
                           body: CategorySpending(
                             groupedTransactions: _transactionByCategory,
                           ),
