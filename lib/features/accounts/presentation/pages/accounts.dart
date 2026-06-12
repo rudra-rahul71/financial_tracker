@@ -219,7 +219,10 @@ class _AccountsPageState extends State<AccountsPage> {
                             totalValue: _totalValue,
                           ),
                           ..._connections.map((account) {
-                            return AccountCard(connection: account);
+                            return AccountCard(
+                              connection: account,
+                              onAccountUpdated: _updateAccounts,
+                            );
                           }),
                         ],
                       ),

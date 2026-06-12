@@ -132,7 +132,7 @@ class _SavingsPageState extends State<SavingsPage> {
 
               return CheckboxListTile(
                 title: Text(
-                  account.name,
+                  account.displayName,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(

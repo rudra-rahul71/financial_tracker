@@ -205,7 +205,7 @@ class _TransactionHistoryState extends State<TransactionHistory> {
 
                     final String amount =
                         '\$${touchedSpot.y.toStringAsFixed(2)}';
-                    final String account = '${entry.$2.name}\n';
+                    final String account = '${entry.$2.displayName}\n';
                     final String body = '$formattedDate\n$amount';
 
                     final TextStyle textStyle = TextStyle(

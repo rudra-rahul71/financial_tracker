@@ -1,10 +1,16 @@
 import 'package:financial_tracker/features/accounts/domain/entities/account.dart';
 import 'package:financial_tracker/features/accounts/domain/entities/item.dart';
+import 'package:financial_tracker/core/database/db_service.dart';
 import 'package:flutter/material.dart';
 
 class AccountCard extends StatefulWidget {
   final MapEntry<String, (Item, List<Account>)> connection;
-  const AccountCard({super.key, required this.connection});
+  final VoidCallback onAccountUpdated;
+  const AccountCard({
+    super.key,
+    required this.connection,
+    required this.onAccountUpdated,
+  });
 
   @override
   State<AccountCard> createState() => _AccountCardState();
@@ -150,10 +156,23 @@ class _AccountCardState extends State<AccountCard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                account.name,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      account.displayName,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, size: 14),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    onPressed: () => _showRenameDialog(context, account),
+                                  ),
+                                ],
                               ),
                               Text(
                                 account.subetype,
@@ -213,5 +232,41 @@ class _AccountCardState extends State<AccountCard> {
     final prefix = value < 0 ? '-\$' : '\$';
     final absValue = value.abs().toStringAsFixed(2);
     return Text('$label: $prefix$absValue');
+  }
+
+  void _showRenameDialog(BuildContext context, Account account) {
+    final textController = TextEditingController(text: account.displayName);
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Rename Account'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(
+              hintText: 'Enter new account name',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final newName = textController.text.trim();
+                if (newName.isNotEmpty) {
+                  Navigator.pop(dialogContext);
+                  await DatabaseService.instance.updateAccountName(account.id, newName);
+                  widget.onAccountUpdated();
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

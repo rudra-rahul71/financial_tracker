@@ -399,4 +399,16 @@ class DatabaseService {
         .doc('config')
         .set({'selectedAccountIds': accountIds}, SetOptions(merge: true));
   }
+
+  Future<void> updateAccountName(String accountId, String customName) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection(Account.tableName)
+        .doc(accountId)
+        .update({Account.columnCustomName: customName});
+  }
 }

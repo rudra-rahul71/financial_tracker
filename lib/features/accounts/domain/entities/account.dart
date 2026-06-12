@@ -1,5 +1,6 @@
 class Account {
   String id, itemId, name, officialName, type, subetype;
+  String? customName;
   double? available, current;
 
   static const String tableName = 'accounts';
@@ -11,6 +12,7 @@ class Account {
   static const String columnSubtype = 'subtype';
   static const String columnAvailable = 'available';
   static const String columnCurrent = 'current';
+  static const String columnCustomName = 'custom_name';
 
   Account({
     required this.id,
@@ -19,9 +21,12 @@ class Account {
     required this.officialName,
     required this.type,
     required this.subetype,
+    this.customName,
     this.available,
     this.current,
   });
+
+  String get displayName => (customName != null && customName!.isNotEmpty) ? customName! : name;
 
   factory Account.fromJson(String itemId, Map<String, dynamic> json) {
     return Account(
@@ -54,6 +59,7 @@ class Account {
       columnSubtype: subetype,
       columnAvailable: available,
       columnCurrent: current,
+      if (customName != null) columnCustomName: customName,
     };
   }
 
@@ -65,6 +71,7 @@ class Account {
       officialName: map[columnOfficialName] as String,
       type: map[columnType] as String,
       subetype: map[columnSubtype] as String,
+      customName: map[columnCustomName] as String?,
       available: (map[columnAvailable] as num?)?.toDouble(),
       current: (map[columnCurrent] as num?)?.toDouble(),
     );

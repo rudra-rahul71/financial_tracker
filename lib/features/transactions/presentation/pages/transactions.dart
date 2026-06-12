@@ -386,7 +386,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               ),
                               child: CheckboxListTile(
                                 title: Text(
-                                  '${entry.value.$1.name} - ${entry.value.$2.name}',
+                                  '${entry.value.$1.name} - ${entry.value.$2.displayName}',
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -446,7 +446,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       final selectedEntry = _groupedTransactions.firstWhere(
         (e) => _selectedAccountKeys.contains(e.key),
       );
-      label = '${selectedEntry.value.$1.name} - ${selectedEntry.value.$2.name}';
+      label = '${selectedEntry.value.$1.name} - ${selectedEntry.value.$2.displayName}';
     } else {
       label = '${_selectedAccountKeys.length} Accounts';
     }
